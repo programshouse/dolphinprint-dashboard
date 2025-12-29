@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
 import { useFeatureStore } from "../../stors/useFeatureStore";
@@ -12,6 +12,10 @@ export default function ServiceForm({ serviceId, onSuccess }) {
 
   const {
     loading,
+    featuresList,
+    feature,              // ✅ assume your store has single feature (if not, remove)
+    fetchfeatures,        // ✅ list fetch
+    getfeatureById,       // ✅ add in store if missing OR we fallback to list
     createfeatures,
     updatefeatures,
   } = useFeatureStore();
@@ -22,6 +26,56 @@ export default function ServiceForm({ serviceId, onSuccess }) {
   const [descAR, setDescAR] = useState("");
   const [image, setImage] = useState(null); // File | URL string | null
   const [activeTab, setActiveTab] = useState("en");
+
+  // ✅ Find feature from list if exists
+  const selectedFromList = useMemo(() => {
+    if (!serviceId) return null;
+    return (featuresList || []).find((f) => String(f.id) === String(serviceId)) || null;
+  }, [featuresList, serviceId]);
+
+  // ✅ Ensure list loaded so edit can prefill from list quickly
+  useEffect(() => {
+    if (serviceId && (!featuresList || featuresList.length === 0)) {
+      fetchfeatures?.().catch(() => {});
+    }
+  }, [serviceId, featuresList, fetchfeatures]);
+
+  // ✅ Load feature by id if your store supports it (optional but best for refresh)
+  useEffect(() => {
+    const load = async () => {
+      if (!serviceId) return;
+      if (getfeatureById) {
+        try {
+          await getfeatureById(serviceId);
+        } catch (e) {
+          // ignore; we might still have it in list
+        }
+      }
+    };
+    load();
+  }, [serviceId, getfeatureById]);
+
+  // ✅ Prefill old data when editing (from store.feature OR from list)
+  useEffect(() => {
+    if (!serviceId) {
+      // create mode -> clear fields
+      setTitleEN("");
+      setTitleAR("");
+      setDescEN("");
+      setDescAR("");
+      setImage(null);
+      return;
+    }
+
+    const f = feature || selectedFromList;
+    if (!f) return;
+
+    setTitleEN(f.title_en || f.title || "");
+    setTitleAR(f.title_ar || "");
+    setDescEN(f.description_en || f.description || "");
+    setDescAR(f.description_ar || "");
+    setImage(f.image || null); // ✅ keep old image URL
+  }, [serviceId, feature, selectedFromList]);
 
   const vErr = useMemo(() => {
     const m = {};
@@ -36,6 +90,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
     return m;
   }, [titleEN, titleAR, descEN, descAR]);
 
+  // ✅ keep FileUpload style but also support URL string in edit mode
   const onFile = (e) => {
     const f = e.target.files?.[0] || null;
     setImage(f);
@@ -49,12 +104,13 @@ export default function ServiceForm({ serviceId, onSuccess }) {
       setSaving(true);
       setErr("");
 
-      // Build FormData so we can send bilingual fields and file
       const fd = new FormData();
       fd.append("title_en", titleEN.trim());
       fd.append("title_ar", titleAR.trim());
       fd.append("description_en", descEN.trim());
       fd.append("description_ar", descAR.trim());
+
+      // ✅ only append if user selected new file
       if (image instanceof File) fd.append("image", image);
 
       if (serviceId) {
@@ -66,7 +122,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
       onSuccess && onSuccess();
     } catch (e) {
       console.error(e);
-      setErr("Error saving service. Please try again.");
+      setErr("Error saving feature. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -79,18 +135,27 @@ export default function ServiceForm({ serviceId, onSuccess }) {
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto"></div>
         <p className="mt-2 text-gray-600 dark:text-gray-300">
-          Loading service…
+          Loading feature…
         </p>
       </div>
     );
   }
 
+  const imagePreview =
+    image instanceof File
+      ? URL.createObjectURL(image)
+      : typeof image === "string"
+      ? image
+      : null;
+
   return (
     <AdminForm
-      title={serviceId ? "Edit Service" : "Add New Service"}
+      title={serviceId ? "Edit Feature" : "Add New Feature"}
       onSubmit={submit}
       onCancel={cancel}
-      submitText={saving ? "Saving..." : serviceId ? "Update Service" : "Create Service"}
+      submitText={
+        saving ? "Saving..." : serviceId ? "Update Feature" : "Create Feature"
+      }
       submitDisabled={saving || Object.keys(vErr).length > 0}
     >
       {err && (
@@ -99,15 +164,34 @@ export default function ServiceForm({ serviceId, onSuccess }) {
         </div>
       )}
 
-      {/* Image */}
+      {/* ✅ Old Image Preview */}
+      {imagePreview && (
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            Current image:
+          </p>
+          <img
+            src={imagePreview}
+            alt="feature"
+            className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+          />
+        </div>
+      )}
+
+      {/* Image Upload */}
       <div className="mb-6">
         <FileUpload
-          label="Service Image"
+          label="Feature Image"
           name="image"
           value={image}
           onChange={onFile}
           accept="image/*"
         />
+        {serviceId && !(image instanceof File) && (
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Leave image empty to keep the current one.
+          </p>
+        )}
       </div>
 
       {/* Tabs */}
@@ -118,7 +202,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
           className={`px-4 py-2 font-semibold ${
             activeTab === "en"
               ? "border-b-2 border-brand-600 text-brand-600"
-              : "text-gray-600"
+              : "text-gray-600 dark:text-gray-300"
           }`}
         >
           English
@@ -129,7 +213,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
           className={`px-4 py-2 font-semibold ${
             activeTab === "ar"
               ? "border-b-2 border-brand-600 text-brand-600"
-              : "text-gray-600"
+              : "text-gray-600 dark:text-gray-300"
           }`}
         >
           العربية
@@ -147,13 +231,15 @@ export default function ServiceForm({ serviceId, onSuccess }) {
               value={titleEN}
               onChange={(e) => setTitleEN(e.target.value)}
               maxLength={MAX_TITLE}
-              placeholder="Service title in English…"
+              placeholder="Feature title in English…"
               className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               required
             />
             <div className="mt-1 flex justify-between text-xs text-gray-500">
               <span>{vErr.titleEN || "\u00A0"}</span>
-              <span>{titleEN.length}/{MAX_TITLE}</span>
+              <span>
+                {titleEN.length}/{MAX_TITLE}
+              </span>
             </div>
           </div>
 
@@ -166,13 +252,15 @@ export default function ServiceForm({ serviceId, onSuccess }) {
               onChange={(e) => setDescEN(e.target.value)}
               rows={5}
               maxLength={MAX_DESC}
-              placeholder="Describe the service in English…"
+              placeholder="Describe the feature in English…"
               className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               required
             />
             <div className="mt-1 flex justify-between text-xs text-gray-500">
               <span>{vErr.descEN || "\u00A0"}</span>
-              <span>{descEN.length}/{MAX_DESC}</span>
+              <span>
+                {descEN.length}/{MAX_DESC}
+              </span>
             </div>
           </div>
         </div>
@@ -180,23 +268,24 @@ export default function ServiceForm({ serviceId, onSuccess }) {
 
       {/* AR */}
       {activeTab === "ar" && (
-        <div className="space-y-4">
+        <div className="space-y-4" dir="rtl">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               العنوان (AR) *
             </label>
             <input
-              dir="auto"
               value={titleAR}
               onChange={(e) => setTitleAR(e.target.value)}
               maxLength={MAX_TITLE}
-              placeholder="عنوان الخدمة باللغة العربية…"
+              placeholder="عنوان الميزة باللغة العربية…"
               className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-right"
               required
             />
             <div className="mt-1 flex justify-between text-xs text-gray-500">
               <span className="invisible">.</span>
-              <span>{titleAR.length}/{MAX_TITLE}</span>
+              <span>
+                {titleAR.length}/{MAX_TITLE}
+              </span>
             </div>
             {vErr.titleAR && (
               <p className="text-xs text-red-600 mt-1">{vErr.titleAR}</p>
@@ -208,18 +297,19 @@ export default function ServiceForm({ serviceId, onSuccess }) {
               الوصف (AR) *
             </label>
             <textarea
-              dir="auto"
               value={descAR}
               onChange={(e) => setDescAR(e.target.value)}
               rows={5}
               maxLength={MAX_DESC}
-              placeholder="صف الخدمة باللغة العربية…"
+              placeholder="صف الميزة باللغة العربية…"
               className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-right"
               required
             />
             <div className="mt-1 flex justify-between text-xs text-gray-500">
               <span className="invisible">.</span>
-              <span>{descAR.length}/{MAX_DESC}</span>
+              <span>
+                {descAR.length}/{MAX_DESC}
+              </span>
             </div>
             {vErr.descAR && (
               <p className="text-xs text-red-600 mt-1">{vErr.descAR}</p>

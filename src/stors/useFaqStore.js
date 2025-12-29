@@ -4,6 +4,18 @@ import { toast } from "react-toastify";
 
 const API_URL = "https://www.programshouse.com/dashboards/dolphin/api";
 
+const getToken = () => {
+  const token =
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("admin_token") ||
+    localStorage.getItem("token");
+
+  // Basic JWT format check
+  if (token && token.split(".").length === 3) return token;
+
+  return null;
+};
+
 export const useFaqStore = create((set) => ({
   faqs: [],
   loading: false,
@@ -14,8 +26,13 @@ export const useFaqStore = create((set) => ({
   getFaqs: async () => {
     try {
       set({ loading: true, error: null });
+      const token = getToken();
+      if (!token) {
+        throw new Error("No valid authentication token found. Please login again.");
+      }
+      
       const res = await axios.get(`${API_URL}/faqs`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       set({ faqs: Array.isArray(res.data.data) ? res.data.data : res.data, loading: false });
       return res.data;
@@ -24,6 +41,7 @@ export const useFaqStore = create((set) => ({
         error: err.response?.data?.message || "Failed to fetch FAQs",
         loading: false,
       });
+      toast.error(err.response?.data?.message || "Failed to fetch FAQs");
       throw err;
     }
   },
@@ -32,8 +50,11 @@ export const useFaqStore = create((set) => ({
   getFaqById: async (id) => {
     try {
       set({ loading: true, error: null });
+      const token = getToken();
+      if (!token) throw new Error("No valid authentication token found. Please login again.");
+      
       const res = await axios.get(`${API_URL}/faqs/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       set({ currentFaq: res.data.data, loading: false });
       return res.data;
@@ -42,6 +63,7 @@ export const useFaqStore = create((set) => ({
         error: err.response?.data?.message || "Failed to fetch FAQ",
         loading: false,
       });
+      toast.error(err.response?.data?.message || "Failed to fetch FAQ");
       throw err;
     }
   },
@@ -51,6 +73,9 @@ export const useFaqStore = create((set) => ({
     try {
       set({ loading: true, error: null });
       
+      const token = getToken();
+      if (!token) throw new Error("No valid authentication token found. Please login again.");
+      
       const formData = new FormData();
       formData.append('question_en', faqData.question_en);
       formData.append('question_ar', faqData.question_ar);
@@ -59,7 +84,7 @@ export const useFaqStore = create((set) => ({
 
       const res = await axios.post(`${API_URL}/faqs`, formData, {
         headers: { 
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         },
       });
@@ -87,24 +112,31 @@ export const useFaqStore = create((set) => ({
     try {
       set({ loading: true, error: null });
       
+      const token = getToken();
+      if (!token) throw new Error("No valid authentication token found. Please login again.");
+      
       const formData = new FormData();
       formData.append('question_en', faqData.question_en);
       formData.append('question_ar', faqData.question_ar);
       formData.append('answer_en', faqData.answer_en);
       formData.append('answer_ar', faqData.answer_ar);
+      formData.append('_method', 'PUT'); // Laravel style: POST + _method=PUT
 
-      const res = await axios.patch(`${API_URL}/faqs/${id}`, formData, {
+      const res = await axios.post(`${API_URL}/faqs/${id}`, formData, {
         headers: { 
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          'Content-Type': 'multipart/form-data'
+          Authorization: `Bearer ${token}`,
+          // Don't set Content-Type for FormData, let axios set it with boundary
         },
       });
 
       const updatedFaq = res.data.data || res.data;
       set(state => ({
         faqs: state.faqs.map(faq => 
-          (faq.id || faq._id) === id ? updatedFaq : faq
+          String(faq.id || faq._id) === String(id) ? updatedFaq : faq
         ),
+        currentFaq: state.currentFaq && String(state.currentFaq.id || state.currentFaq._id) === String(id) 
+          ? updatedFaq 
+          : state.currentFaq,
         loading: false
       }));
       
@@ -124,12 +156,18 @@ export const useFaqStore = create((set) => ({
   deleteFaq: async (id) => {
     try {
       set({ loading: true, error: null });
+      const token = getToken();
+      if (!token) throw new Error("No valid authentication token found. Please login again.");
+      
       await axios.delete(`${API_URL}/faqs/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       
       set(state => ({
-        faqs: state.faqs.filter(faq => (faq.id || faq._id) !== id),
+        faqs: state.faqs.filter(faq => String(faq.id || faq._id) !== String(id)),
+        currentFaq: state.currentFaq && String(state.currentFaq.id || state.currentFaq._id) === String(id)
+          ? null
+          : state.currentFaq,
         loading: false
       }));
       

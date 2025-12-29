@@ -26,6 +26,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
   useEffect(() => {
     const load = async () => {
       try {
+        console.log("Loading service with ID:", serviceId);
         await getServiceById(serviceId);
       } catch (e) {
         console.error("Error loading service:", e);
@@ -41,12 +42,13 @@ export default function ServiceForm({ serviceId, onSuccess }) {
 
   useEffect(() => {
     if (serviceId && service) {
+      console.log("Loading service data into form:", service);
       setFormData({
         title_en: service.title_en || "",
         title_ar: service.title_ar || "",
         description_en: service.description_en || "",
         description_ar: service.description_ar || "",
-        image: service.image || null, // keep url as string
+        image: service.image || null,
       });
     }
   }, [serviceId, service]);

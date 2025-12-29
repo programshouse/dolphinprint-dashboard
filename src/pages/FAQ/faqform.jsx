@@ -12,15 +12,59 @@ const blankFaq = () => ({
 
 export default function FaqForm({ faqId, onSuccess }) {
   const isEditing = !!faqId;
-  const { currentFaq, loading, getFaqById, createFaq, updateFaq } = useFaqStore();
+
+  const {
+    faqs,            // ✅ list (if your store exposes it; if not, remove this part)
+    currentFaq,
+    loading,
+    getFaqById,
+    createFaq,
+    updateFaq,
+    clearCurrentFaq, // ✅ add in store if exists; optional but recommended
+  } = useFaqStore();
 
   // In create mode we allow multiple; in edit we only show one
-  const [faqs, setFaqs] = useState([blankFaq()]);
+  const [faqsForm, setFaqsForm] = useState([blankFaq()]);
   const [saving, setSaving] = useState(false);
 
-  // Load for edit (single item)
+  // ✅ If we have list, try to find FAQ locally (instant prefill)
+  const localFaq = useMemo(() => {
+    if (!isEditing) return null;
+    if (!faqs || !Array.isArray(faqs)) return null;
+    return faqs.find((f) => String(f.id) === String(faqId)) || null;
+  }, [faqs, faqId, isEditing]);
+
+  // ✅ Reset form when switching to create mode (prevents old data sticking)
+  useEffect(() => {
+    if (!isEditing) {
+      setFaqsForm([blankFaq()]);
+      return;
+    }
+  }, [isEditing]);
+
+  // ✅ Prefill from list immediately if available
   useEffect(() => {
     if (!isEditing) return;
+    if (!localFaq) return;
+
+    setFaqsForm([
+      {
+        question_en: localFaq?.question_en || "",
+        question_ar: localFaq?.question_ar || "",
+        answer_en: localFaq?.answer_en || "",
+        answer_ar: localFaq?.answer_ar || "",
+      },
+    ]);
+  }, [isEditing, localFaq]);
+
+  // ✅ Fetch by id if not in list OR to ensure latest data
+  useEffect(() => {
+    if (!isEditing) return;
+
+    // if we already have localFaq, we can skip fetch to avoid flicker
+    // If you want ALWAYS latest from server, remove the `if (localFaq) return;`
+    if (localFaq) return;
+
     (async () => {
       try {
         await getFaqById(faqId);
@@ -28,26 +72,34 @@ export default function FaqForm({ faqId, onSuccess }) {
         console.error("Error loading FAQ:", error);
       }
     })();
-  }, [faqId, isEditing, getFaqById]);
+  }, [faqId, isEditing, getFaqById, localFaq]);
 
-  // Update form when currentFaq changes
+  // ✅ When currentFaq loads from API, fill the form (edit mode)
   useEffect(() => {
-    if (isEditing && currentFaq) {
-      setFaqs([
-        {
-          question_en: currentFaq?.question_en || "",
-          question_ar: currentFaq?.question_ar || "",
-          answer_en: currentFaq?.answer_en || "",
-          answer_ar: currentFaq?.answer_ar || "",
-        },
-      ]);
-    }
+    if (!isEditing) return;
+    if (!currentFaq) return;
+
+    setFaqsForm([
+      {
+        question_en: currentFaq?.question_en || "",
+        question_ar: currentFaq?.question_ar || "",
+        answer_en: currentFaq?.answer_en || "",
+        answer_ar: currentFaq?.answer_ar || "",
+      },
+    ]);
   }, [currentFaq, isEditing]);
+
+  // ✅ Clear currentFaq on unmount so create mode doesn't show previous edit data
+  useEffect(() => {
+    return () => {
+      if (clearCurrentFaq) clearCurrentFaq();
+    };
+  }, [clearCurrentFaq]);
 
   // Validation
   const errs = useMemo(() => {
     const e = [];
-    faqs.forEach((f, i) => {
+    faqsForm.forEach((f, i) => {
       const missing =
         !f.question_en.trim() ||
         !f.question_ar.trim() ||
@@ -56,23 +108,23 @@ export default function FaqForm({ faqId, onSuccess }) {
       if (missing) e.push(i);
     });
     return e; // array of invalid indexes
-  }, [faqs]);
+  }, [faqsForm]);
 
-  const disabled = saving || faqs.length === 0 || errs.length > 0;
+  const disabled = saving || faqsForm.length === 0 || errs.length > 0;
 
   // Handlers
   const updateField = (idx, key, val) =>
-    setFaqs((prev) =>
+    setFaqsForm((prev) =>
       prev.map((f, i) => (i === idx ? { ...f, [key]: val } : f))
     );
 
-  const addFaq = () => setFaqs((prev) => [...prev, blankFaq()]);
+  const addFaq = () => setFaqsForm((prev) => [...prev, blankFaq()]);
 
   const removeFaq = (idx) =>
-    setFaqs((prev) => prev.filter((_, i) => i !== idx));
+    setFaqsForm((prev) => prev.filter((_, i) => i !== idx));
 
   const move = (idx, dir) =>
-    setFaqs((prev) => {
+    setFaqsForm((prev) => {
       const next = [...prev];
       const j = idx + dir;
       if (j < 0 || j >= next.length) return prev;
@@ -87,13 +139,17 @@ export default function FaqForm({ faqId, onSuccess }) {
 
     try {
       setSaving(true);
+
       if (isEditing) {
-        // Edit only the first (only card)
-        const one = { ...faqs[0] };
+        const one = {
+          question_en: faqsForm[0].question_en.trim(),
+          question_ar: faqsForm[0].question_ar.trim(),
+          answer_en: faqsForm[0].answer_en.trim(),
+          answer_ar: faqsForm[0].answer_ar.trim(),
+        };
         await updateFaq(faqId, one);
       } else {
-        // Create all valid ones
-        const toCreate = faqs
+        const toCreate = faqsForm
           .map((f) => ({
             question_en: f.question_en.trim(),
             question_ar: f.question_ar.trim(),
@@ -101,15 +157,12 @@ export default function FaqForm({ faqId, onSuccess }) {
             answer_ar: f.answer_ar.trim(),
           }))
           .filter(
-            (f) =>
-              f.question_en &&
-              f.question_ar &&
-              f.answer_en &&
-              f.answer_ar
+            (f) => f.question_en && f.question_ar && f.answer_en && f.answer_ar
           );
-        // Send sequentially or in parallel
+
         await Promise.all(toCreate.map((f) => createFaq(f)));
       }
+
       onSuccess && onSuccess();
     } catch (err) {
       console.error(err);
@@ -136,13 +189,16 @@ export default function FaqForm({ faqId, onSuccess }) {
       onSubmit={submit}
       onCancel={cancel}
       submitText={
-        saving ? "Saving..." : isEditing ? "Update FAQ" : `Create ${faqs.length} FAQ${faqs.length > 1 ? "s" : ""}`
+        saving
+          ? "Saving..."
+          : isEditing
+          ? "Update FAQ"
+          : `Create ${faqsForm.length} FAQ${faqsForm.length > 1 ? "s" : ""}`
       }
       submitDisabled={disabled}
     >
-      {/* Multiple FAQ blocks */}
       <div className="space-y-5">
-        {faqs.map((f, i) => {
+        {faqsForm.map((f, i) => {
           const invalid = errs.includes(i);
           return (
             <div
@@ -170,7 +226,7 @@ export default function FaqForm({ faqId, onSuccess }) {
                     type="button"
                     onClick={() => move(i, +1)}
                     className="px-2 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    disabled={i === faqs.length - 1}
+                    disabled={i === faqsForm.length - 1}
                   >
                     ↓
                   </button>
@@ -194,7 +250,9 @@ export default function FaqForm({ faqId, onSuccess }) {
                   </label>
                   <input
                     value={f.question_en}
-                    onChange={(e) => updateField(i, "question_en", e.target.value)}
+                    onChange={(e) =>
+                      updateField(i, "question_en", e.target.value)
+                    }
                     placeholder="e.g., How do I book a session?"
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     required
@@ -206,7 +264,9 @@ export default function FaqForm({ faqId, onSuccess }) {
                   </label>
                   <input
                     value={f.question_ar}
-                    onChange={(e) => updateField(i, "question_ar", e.target.value)}
+                    onChange={(e) =>
+                      updateField(i, "question_ar", e.target.value)
+                    }
                     placeholder="مثال: كيف أحجز جلسة؟"
                     dir="rtl"
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -223,7 +283,9 @@ export default function FaqForm({ faqId, onSuccess }) {
                   </label>
                   <textarea
                     value={f.answer_en}
-                    onChange={(e) => updateField(i, "answer_en", e.target.value)}
+                    onChange={(e) =>
+                      updateField(i, "answer_en", e.target.value)
+                    }
                     rows={5}
                     placeholder="Provide a clear and helpful answer in English…"
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -236,7 +298,9 @@ export default function FaqForm({ faqId, onSuccess }) {
                   </label>
                   <textarea
                     value={f.answer_ar}
-                    onChange={(e) => updateField(i, "answer_ar", e.target.value)}
+                    onChange={(e) =>
+                      updateField(i, "answer_ar", e.target.value)
+                    }
                     rows={5}
                     placeholder="أدخل إجابة واضحة ومفيدة بالعربية…"
                     dir="rtl"
@@ -255,7 +319,6 @@ export default function FaqForm({ faqId, onSuccess }) {
           );
         })}
 
-        {/* Add button only in create mode */}
         {!isEditing && (
           <div className="flex">
             <button

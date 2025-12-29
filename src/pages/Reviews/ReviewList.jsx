@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import PageCard from "../../components/ui/PageCard";
@@ -6,6 +7,7 @@ import Toaster from "../../components/ui/Toaster/Toaster";
 import { useReviewStore } from "../../stors/useReviewStore";
 
 export default function ReviewList({ onAdd, onEdit, onShow }) {
+  const navigate = useNavigate();
   const { reviews, loading, error, getAllReviews, deleteReview } = useReviewStore();
 
   useEffect(() => { 
@@ -22,7 +24,7 @@ export default function ReviewList({ onAdd, onEdit, onShow }) {
   };
 
   const handleShow = (review) => {
-    if (onShow) onShow(review);
+    navigate(`/reviews/${review.id}`);
   };
 
   if (loading) {

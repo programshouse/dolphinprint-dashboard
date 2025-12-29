@@ -42,6 +42,7 @@ const router = createBrowserRouter([
       // Reviews
       { path: "/reviews", element: <Reviews /> },
       { path: "/reviews/form", element: <Reviews /> },
+      { path: "/reviews/:id", element: <Reviews /> },
 
       // 👇 Main Services (bilingual)
       { path: "/mainservices", element: <MainServices /> },

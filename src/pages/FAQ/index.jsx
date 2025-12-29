@@ -4,12 +4,14 @@ import { useLocation } from "react-router-dom";
 import FaqForm from "./faqform";
 import FaqList from "./faqlist";
 import FaqDetail from "./FaqDetail";
+import { useFaqStore } from "../../stors/useFaqStore";
 
 export default function FaqPage() {   // <- renamed from FAQ
   const location = useLocation();
   const [showForm, setShowForm] = useState(false);
   const [editingFaq, setEditingFaq] = useState(null);
   const [viewingFaq, setViewingFaq] = useState(null);
+  const { getFaqs } = useFaqStore();
 
   const isForm = location.pathname.includes("/form") || showForm;
 
@@ -34,6 +36,8 @@ export default function FaqPage() {   // <- renamed from FAQ
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditingFaq(null);
+    // Refresh the FAQ list after successful create/update
+    getFaqs();
   };
 
   if (isForm) {
