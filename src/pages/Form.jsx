@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import AdminForm from "../../src/components/ui/AdminForm";
 import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
+import { Check, X } from "lucide-react";
 
 // Optional: wire to your real settings API
 // import { settingsAPI } from "../../services/api";
@@ -82,11 +83,8 @@ export default function SiteInfoForm({
   const inputCls =
     "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white";
 
-  const SocialRow = ({ icon: Icon, placeholder, value, onChange }) => (
+  const SocialRow = ({ placeholder, value, onChange }) => (
     <div className="flex items-center gap-3">
-      <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <Icon className="text-gray-600 dark:text-gray-300" />
-      </span>
       <input
         type="url"
         inputMode="url"
@@ -103,8 +101,10 @@ export default function SiteInfoForm({
       title="Site Information"
       onSubmit={submit}
       onCancel={cancel}
-      submitText={saving ? "Saving..." : "Save Settings"}
+      submitText={saving ? "" : "Save"}
       submitDisabled={saving || !valid}
+      submitIcon={saving ? null : <Check className="w-4 h-4" />}
+      cancelIcon={<X className="w-4 h-4" />}
     >
       {/* Basic Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -117,7 +117,7 @@ export default function SiteInfoForm({
             value={form.siteName}
             onChange={(e) => setField("siteName", e.target.value)}
             className={inputCls}
-            placeholder="e.g., ProfMSE"
+            placeholder="e.g., Dolphin Print"
             required
             maxLength={140}
           />
@@ -174,31 +174,26 @@ export default function SiteInfoForm({
         </h3>
         <div className="space-y-4">
           <SocialRow
-            icon={FaFacebookF}
             placeholder="Facebook page URL"
             value={form.socials.facebook}
             onChange={(v) => setSocial("facebook", v)}
           />
           <SocialRow
-            icon={FaWhatsapp}
             placeholder="WhatsApp link (e.g., https://wa.me/201XXXXXXXXX)"
             value={form.socials.whatsapp}
             onChange={(v) => setSocial("whatsapp", v)}
           />
           <SocialRow
-            icon={FaInstagram}
             placeholder="Instagram profile URL"
             value={form.socials.instagram}
             onChange={(v) => setSocial("instagram", v)}
           />
           <SocialRow
-            icon={FaTwitter}
             placeholder="X / Twitter profile URL"
             value={form.socials.twitter}
             onChange={(v) => setSocial("twitter", v)}
           />
           <SocialRow
-            icon={FaLinkedinIn}
             placeholder="LinkedIn page URL"
             value={form.socials.linkedin}
             onChange={(v) => setSocial("linkedin", v)}

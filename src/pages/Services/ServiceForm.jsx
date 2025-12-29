@@ -1,163 +1,172 @@
-// src/pages/Services/ServiceForm.jsx
 import React, { useEffect, useState } from "react";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
-import { servicesAPI } from "../../services/api";
+import { useServicesStore } from "../../stors/useServicesStore";
 
 export default function ServiceForm({ serviceId, onSuccess }) {
-  const [loading, setLoading] = useState(!!serviceId);
-  const [saving, setSaving]   = useState(false);
+  const [formData, setFormData] = useState({
+    title_en: "",
+    title_ar: "",
+    description_en: "",
+    description_ar: "",
+    image: null, // can be File OR string url (when editing)
+  });
 
-  // bilingual fields + image
-  const [titleEn, setTitleEn] = useState("");
-  const [titleAr, setTitleAr] = useState("");
-  const [descEn,  setDescEn]  = useState("");
-  const [descAr,  setDescAr]  = useState("");
-  const [image,   setImage]   = useState(null); // File or URL string
+  const {
+    service,
+    loading,
+    getServiceById,
+    createService,
+    updateService,
+    clearService,
+  } = useServicesStore();
+
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!serviceId) return;
-    (async () => {
+    const load = async () => {
       try {
-        setLoading(true);
-        const { data } = await servicesAPI.getById(serviceId);
-        // backward-compatible fallback if old records were single-lang
-        setTitleEn(data?.title_en || data?.title || "");
-        setTitleAr(data?.title_ar || "");
-        setDescEn(data?.description_en || data?.description || "");
-        setDescAr(data?.description_ar || "");
-        setImage(data?.image || null);
-      } finally {
-        setLoading(false);
+        await getServiceById(serviceId);
+      } catch (e) {
+        console.error("Error loading service:", e);
       }
-    })();
-  }, [serviceId]);
+    };
 
-  const onFile = (e) => {
-    const f = e.target.files?.[0] || null;
-    setImage(f);
+    if (serviceId) load();
+
+    return () => {
+      clearService();
+    };
+  }, [serviceId, getServiceById, clearService]);
+
+  useEffect(() => {
+    if (serviceId && service) {
+      setFormData({
+        title_en: service.title_en || "",
+        title_ar: service.title_ar || "",
+        description_en: service.description_en || "",
+        description_ar: service.description_ar || "",
+        image: service.image || null, // keep url as string
+      });
+    }
+  }, [serviceId, service]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const submit = async (e) => {
+  const handleFileChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!titleEn.trim() || !titleAr.trim() || !descEn.trim() || !descAr.trim()) return;
 
     try {
       setSaving(true);
-      // Send as FormData so both langs + optional image are preserved
-      const fd = new FormData();
-      fd.append("title_en", titleEn.trim());
-      fd.append("title_ar", titleAr.trim());
-      fd.append("description_en", descEn.trim());
-      fd.append("description_ar", descAr.trim());
-      if (image instanceof File) fd.append("image", image);
 
       if (serviceId) {
-        await servicesAPI.update(serviceId, fd); // requires small tweak below
+        await updateService(serviceId, formData);
       } else {
-        await servicesAPI.create(fd);            // requires small tweak below
+        await createService(formData);
       }
 
-      onSuccess && onSuccess();
-    } catch (err) {
-      console.error(err);
-      alert("Error saving service. Please try again.");
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error("Error saving service:", error);
     } finally {
       setSaving(false);
     }
   };
 
-  const cancel = () => onSuccess && onSuccess();
+  const handleCancel = () => {
+    if (onSuccess) onSuccess();
+  };
 
   if (loading) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
-        <p className="mt-2 text-gray-600 dark:text-gray-300">Loading service…</p>
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
+          Loading service...
+        </p>
       </div>
     );
   }
 
-  const disabled =
-    saving ||
-    !titleEn.trim() || !titleAr.trim() ||
-    !descEn.trim()  || !descAr.trim();
-
   return (
     <AdminForm
       title={serviceId ? "Edit Service" : "Add New Service"}
-      onSubmit={submit}
-      onCancel={cancel}
-      submitText={saving ? "Saving..." : serviceId ? "Update Service" : "Create Service"}
-      submitDisabled={disabled}
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      submitText={
+        saving ? "Saving..." : serviceId ? "Update Service" : "Create Service"
+      }
     >
-      {/* Titles */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Service Title (EN) *
-          </label>
-          <input
-            value={titleEn}
-            onChange={(e) => setTitleEn(e.target.value)}
-            placeholder="e.g., Leadership Coaching"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            عنوان الخدمة (AR) *
-          </label>
-          <input
-            value={titleAr}
-            onChange={(e) => setTitleAr(e.target.value)}
-            placeholder="مثال: تدريب القيادة"
-            dir="rtl"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            required
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Service Title (English) *
+        </label>
+        <input
+          type="text"
+          name="title_en"
+          value={formData.title_en}
+          onChange={handleInputChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          required
+        />
       </div>
 
-      {/* Descriptions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Description (EN) *
-          </label>
-          <textarea
-            value={descEn}
-            onChange={(e) => setDescEn(e.target.value)}
-            rows={5}
-            placeholder="Describe the service in English…"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            الوصف (AR) *
-          </label>
-          <textarea
-            value={descAr}
-            onChange={(e) => setDescAr(e.target.value)}
-            rows={5}
-            placeholder="صف الخدمة بالعربية…"
-            dir="rtl"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            required
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Service Title (Arabic) *
+        </label>
+        <input
+          type="text"
+          name="title_ar"
+          value={formData.title_ar}
+          onChange={handleInputChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          required
+        />
       </div>
 
-      {/* Image */}
-      <div className="mt-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Description (English) *
+        </label>
+        <textarea
+          name="description_en"
+          value={formData.description_en}
+          onChange={handleInputChange}
+          rows={4}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Description (Arabic) *
+        </label>
+        <textarea
+          name="description_ar"
+          value={formData.description_ar}
+          onChange={handleInputChange}
+          rows={4}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          required
+        />
+      </div>
+
+      <div>
         <FileUpload
-          label="Service Image (optional)"
+          label="Image"
           name="image"
-          value={image}
-          onChange={onFile}
+          value={formData.image}
+          onChange={handleFileChange}
           accept="image/*"
         />
       </div>

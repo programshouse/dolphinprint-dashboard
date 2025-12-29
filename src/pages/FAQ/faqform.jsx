@@ -1,7 +1,7 @@
 // src/pages/FAQ/FaqForm.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import AdminForm from "../../components/ui/AdminForm";
-import { faqsAPI } from "../../services/api";
+import { useFaqStore } from "../../stors/useFaqStore";
 
 const blankFaq = () => ({
   question_en: "",
@@ -12,10 +12,10 @@ const blankFaq = () => ({
 
 export default function FaqForm({ faqId, onSuccess }) {
   const isEditing = !!faqId;
+  const { currentFaq, loading, getFaqById, createFaq, updateFaq } = useFaqStore();
 
   // In create mode we allow multiple; in edit we only show one
   const [faqs, setFaqs] = useState([blankFaq()]);
-  const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
 
   // Load for edit (single item)
@@ -23,21 +23,26 @@ export default function FaqForm({ faqId, onSuccess }) {
     if (!isEditing) return;
     (async () => {
       try {
-        setLoading(true);
-        const { data } = await faqsAPI.getById(faqId);
-        setFaqs([
-          {
-            question_en: data?.question_en || "",
-            question_ar: data?.question_ar || "",
-            answer_en: data?.answer_en || "",
-            answer_ar: data?.answer_ar || "",
-          },
-        ]);
-      } finally {
-        setLoading(false);
+        await getFaqById(faqId);
+      } catch (error) {
+        console.error("Error loading FAQ:", error);
       }
     })();
-  }, [faqId, isEditing]);
+  }, [faqId, isEditing, getFaqById]);
+
+  // Update form when currentFaq changes
+  useEffect(() => {
+    if (isEditing && currentFaq) {
+      setFaqs([
+        {
+          question_en: currentFaq?.question_en || "",
+          question_ar: currentFaq?.question_ar || "",
+          answer_en: currentFaq?.answer_en || "",
+          answer_ar: currentFaq?.answer_ar || "",
+        },
+      ]);
+    }
+  }, [currentFaq, isEditing]);
 
   // Validation
   const errs = useMemo(() => {
@@ -85,7 +90,7 @@ export default function FaqForm({ faqId, onSuccess }) {
       if (isEditing) {
         // Edit only the first (only card)
         const one = { ...faqs[0] };
-        await faqsAPI.update(faqId, one);
+        await updateFaq(faqId, one);
       } else {
         // Create all valid ones
         const toCreate = faqs
@@ -103,7 +108,7 @@ export default function FaqForm({ faqId, onSuccess }) {
               f.answer_ar
           );
         // Send sequentially or in parallel
-        await Promise.all(toCreate.map((f) => faqsAPI.create(f)));
+        await Promise.all(toCreate.map((f) => createFaq(f)));
       }
       onSuccess && onSuccess();
     } catch (err) {

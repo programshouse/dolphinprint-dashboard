@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import ReviewForm from "./ReviewForm";
 import ReviewList from "./ReviewList";
+import ReviewDetail from "./ReviewDetail";
 
 export default function Reviews() {
   const location = useLocation();
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [viewing, setViewing] = useState(null);
 
   const isForm = location.pathname.includes("/form") || showForm;
 
@@ -20,6 +22,14 @@ export default function Reviews() {
     setShowForm(true);
   };
 
+  const handleShow = (review) => {
+    setViewing(review);
+  };
+
+  const handleDetailClose = () => {
+    setViewing(null);
+  };
+
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditing(null);
@@ -29,5 +39,15 @@ export default function Reviews() {
     return <ReviewForm reviewId={editing?.id} onSuccess={handleFormSuccess} />;
   }
 
-  return <ReviewList onAdd={handleAdd} onEdit={handleEdit} />;
+  return (
+    <>
+      <ReviewList onAdd={handleAdd} onEdit={handleEdit} onShow={handleShow} />
+      {viewing && (
+        <ReviewDetail 
+          review={viewing}
+          onClose={handleDetailClose}
+        />
+      )}
+    </>
+  );
 }

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API_ROOT = "https://www.programshouse.com/reem/api/v1/admins";
+const API_ROOT = "https://www.programshouse.com/dashboards/dolphin/api";
 
 export const useCreateStore = create((set) => ({
   loading: false,

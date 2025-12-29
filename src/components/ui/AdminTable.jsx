@@ -6,6 +6,7 @@ const AdminTable = ({
   columns = [], 
   onEdit, 
   onDelete, 
+  onShow,
   onAdd,
   addText = "Add New",
   className = "" 
@@ -53,6 +54,14 @@ const AdminTable = ({
                 ))}
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex gap-2">
+                    {onShow && (
+                      <button
+                        onClick={() => onShow(item, index)}
+                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                      >
+                        View
+                      </button>
+                    )}
                     <button
                       onClick={() => onEdit(item, index)}
                       className="text-brand-600 hover:text-brand-900 dark:text-brand-400 dark:hover:text-brand-300"

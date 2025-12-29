@@ -1,15 +1,20 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
-import { servicesAPI } from "../../services/api";
+import { useFeatureStore } from "../../stors/useFeatureStore";
 
 const MAX_TITLE = 140;
 const MAX_DESC = 2000;
 
 export default function ServiceForm({ serviceId, onSuccess }) {
-  const [loading, setLoading] = useState(!!serviceId);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
+
+  const {
+    loading,
+    createfeatures,
+    updatefeatures,
+  } = useFeatureStore();
 
   const [titleEN, setTitleEN] = useState("");
   const [titleAR, setTitleAR] = useState("");
@@ -17,27 +22,6 @@ export default function ServiceForm({ serviceId, onSuccess }) {
   const [descAR, setDescAR] = useState("");
   const [image, setImage] = useState(null); // File | URL string | null
   const [activeTab, setActiveTab] = useState("en");
-
-  useEffect(() => {
-    if (!serviceId) return;
-    (async () => {
-      try {
-        setLoading(true);
-        const { data } = await servicesAPI.getById(serviceId);
-        // Be defensive: accept either single-lang fields or bilingual ones
-        setTitleEN(data?.title_en ?? data?.title ?? "");
-        setTitleAR(data?.title_ar ?? "");
-        setDescEN(data?.description_en ?? data?.description ?? "");
-        setDescAR(data?.description_ar ?? "");
-        setImage(data?.image ?? null);
-      } catch (e) {
-        setErr("Failed to load service.");
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [serviceId]);
 
   const vErr = useMemo(() => {
     const m = {};
@@ -73,8 +57,11 @@ export default function ServiceForm({ serviceId, onSuccess }) {
       fd.append("description_ar", descAR.trim());
       if (image instanceof File) fd.append("image", image);
 
-      if (serviceId) await servicesAPI.update(serviceId, fd);
-      else await servicesAPI.create(fd);
+      if (serviceId) {
+        await updatefeatures(serviceId, fd);
+      } else {
+        await createfeatures(fd);
+      }
 
       onSuccess && onSuccess();
     } catch (e) {

@@ -13,9 +13,10 @@ import Card from "./components/ui/card.jsx";
 import AppLayout from "./layout/AppLayout";
 import Home from "./pages/Dashboard/Home";
 import Services from "./pages/Services";
-import Form from "./pages/Form";
+import Contact from "./pages/Contact";
 import Reviews from "./pages/reviews";
-
+import Settings from "./pages/Settings/SettingsList.jsx";
+import SettingsForm from "./pages/Settings/SettingsForm.jsx";
 // 👇 NEW: Main Services (index toggles list/form internally)
 import MainServices from "./pages/mainservices"; // <— make sure this path matches your folder
 import FAQ from "./pages/FAQ/index.jsx";
@@ -47,13 +48,16 @@ const router = createBrowserRouter([
       { path: "/mainservices/form", element: <MainServices /> },
       { path: "/faq", element: <FAQ /> },
 
-      // Contact form
-      { path: "/form", element: <Form /> },
+         // Contact form
+      { path: "/form", element: <SettingsForm /> },
 
+      // Settings
+      { path: "/settings", element: <Settings /> },
+      { path: "/settings/form", element: <SettingsForm /> },
       // Demo card page
       { path: "/card", element: <Card /> },
       { path: "/faq", element: <FAQ /> },
-{ path: "/faq/form", element: <FAQ /> },
+      { path: "/faq/form", element: <FAQ /> },
     ],
   },
   {

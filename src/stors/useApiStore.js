@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API_ROOT = "https://www.programshouse.com/reem/api/v1/admins";
+const API_ROOT = "https://www.programshouse.com/dashboards/dolphin/api";
 
 const api = axios.create({
   baseURL: API_ROOT,

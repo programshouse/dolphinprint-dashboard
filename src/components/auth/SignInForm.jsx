@@ -25,6 +25,7 @@ export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
+    console.log('Access token changed:', access_token); // Debug log
     if (access_token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
       navigate("/");  

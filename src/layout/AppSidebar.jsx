@@ -19,6 +19,11 @@ const navItems = [
     icon: <MdMiscellaneousServices />,
     path: "/mainservices",
   },
+  { 
+    name: "Services", 
+    icon: <MdWork />, 
+    path: "/services" 
+  },
   { name: "FAQ", icon: <MdArticle />, path: "/faq" },
 
   {
@@ -26,11 +31,7 @@ const navItems = [
     icon: <MdReviews />,
     path: "/reviews",
   },
-  {
-    name: "Contact",
-    icon: <MdDescription />,
-    path: "/form",
-  }, 
+  { name: "Contact", icon: <MdDescription />, path: "/form" },
 ];
 
 const AppSidebar = () => {

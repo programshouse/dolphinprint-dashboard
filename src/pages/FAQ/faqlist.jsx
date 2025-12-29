@@ -1,34 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
-import { faqsAPI } from "../../services/api";
+import { useFaqStore } from "../../stors/useFaqStore";
 
-export default function FaqList({ onEdit, onAdd }) {
-  const [faqs, setFaqs] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function FaqList({ onEdit, onAdd, onShow }) {
+  const { faqs, loading, getFaqs, deleteFaq } = useFaqStore();
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const { data } = await faqsAPI.getAll();
-      setFaqs(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error("Error loading FAQs:", e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    getFaqs();
+  }, [getFaqs]);
 
   const handleDelete = async (faq) => {
     if (!window.confirm(`Delete this FAQ?\n\n${faq.question_en || ""}`)) return;
     try {
-      await faqsAPI.delete(faq.id || faq._id);
-      load();
+      await deleteFaq(faq.id || faq._id);
     } catch (e) {
       console.error("Error deleting FAQ:", e);
-      alert("Error deleting FAQ. Please try again.");
     }
   };
 
@@ -55,6 +42,12 @@ export default function FaqList({ onEdit, onAdd }) {
 
           <div className="mt-4 flex gap-2">
             <button
+              onClick={() => onShow && onShow(item)}
+              className="px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            >
+              View
+            </button>
+            <button
               onClick={() => onEdit(item)}
               className="px-3 py-2 rounded-md bg-brand-600 text-white hover:bg-brand-700"
             >
@@ -74,7 +67,7 @@ export default function FaqList({ onEdit, onAdd }) {
 
   if (loading) {
     return (
-      <PageLayout title="FAQs | ProfMSE">
+      <PageLayout title="FAQs | Dolphin Print">
         <PageHeader title="FAQs" description="Manage your frequently asked questions" />
         <div className="col-span-12">
           <div className="flex justify-end mb-4">
@@ -99,7 +92,7 @@ export default function FaqList({ onEdit, onAdd }) {
   }
 
   return (
-    <PageLayout title="FAQs | ProfMSE">
+    <PageLayout title="FAQs | Dolphin Print">
       <PageHeader title="FAQs" description="Manage your frequently asked questions" />
       <div className="col-span-12">
         <div className="flex justify-end mb-4">

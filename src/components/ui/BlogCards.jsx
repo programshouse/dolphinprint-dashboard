@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 
 /**
  * BlogCards
- * - GET    https://www.programshouse.com/reem/api/v1/admins/blogs
- * - DELETE https://www.programshouse.com/reem/api/v1/admins/blogs/:id
+ * - GET    https://www.programshouse.com/dashboards/dolphin/api/blogs
+ * - DELETE https://www.programshouse.com/dashboards/dolphin/api/blogs/:id
  *
  * Pass an auth header if required:
  *   const headers = { Authorization: `Bearer ${token}` };

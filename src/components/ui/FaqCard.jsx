@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function FaqCard({ question, answer, category, updatedAt }) {
+export default function FaqCard({ question, answer, category, updatedAt, onShow, onEdit, onDelete, id }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-4">
@@ -30,6 +30,36 @@ export default function FaqCard({ question, answer, category, updatedAt }) {
           {updatedAt && (
             <div className="mt-3 text-xs text-gray-400">
               Updated: {new Date(updatedAt).toLocaleDateString()}
+            </div>
+          )}
+          
+          {/* Action Buttons */}
+          {(onShow || onEdit || onDelete) && (
+            <div className="mt-4 flex gap-2">
+              {onShow && (
+                <button
+                  onClick={() => onShow(id)}
+                  className="px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                >
+                  View
+                </button>
+              )}
+              {onEdit && (
+                <button
+                  onClick={() => onEdit(id)}
+                  className="px-3 py-2 rounded-md bg-brand-600 text-white hover:bg-brand-700"
+                >
+                  Edit
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={() => onDelete(id)}
+                  className="px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  Delete
+                </button>
+              )}
             </div>
           )}
         </div>
