@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import ReviewForm from "./ReviewForm";
 import ReviewList from "./ReviewList";
 import ReviewDetail from "./ReviewDetail";
@@ -8,27 +8,20 @@ import { useReviewStore } from "../../stors/useReviewStore";
 export default function Reviews() {
   const { id } = useParams();
   const location = useLocation();
-  const { getReviewById } = useReviewStore();
+  const navigate = useNavigate();
+  const { getAllReviews } = useReviewStore();
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [viewing, setViewing] = useState(null);
 
   const isForm = location.pathname.includes("/form") || showForm;
-  const isDetailView = id && !isForm;
+  const isDetail = !!id;
 
+  // Load reviews on component mount
   useEffect(() => {
-    if (id && !isForm) {
-      const loadReview = async () => {
-        try {
-          const review = await getReviewById(id);
-          setViewing(review);
-        } catch (error) {
-          console.error("Error loading review:", error);
-        }
-      };
-      loadReview();
+    if (!isDetail) {
+      getAllReviews().catch(e => console.error("Error loading reviews:", e));
     }
-  }, [id, isForm, getReviewById]);
+  }, [isDetail, getAllReviews]);
 
   const handleAdd = () => {
     setEditing(null);
@@ -41,40 +34,29 @@ export default function Reviews() {
   };
 
   const handleShow = (review) => {
-    setViewing(review);
-  };
-
-  const handleDetailClose = () => {
-    setViewing(null);
+    navigate(`/reviews/${review.id || review._id}`);
   };
 
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditing(null);
+    getAllReviews();
+    // If we're on a detail page, navigate back to list
+    if (isDetail) {
+      navigate("/reviews");
+    }
   };
+
+  // Show detail page
+  if (isDetail) {
+    return <ReviewDetail />;
+  }
 
   if (isForm) {
     return <ReviewForm reviewId={editing?.id} onSuccess={handleFormSuccess} />;
   }
 
-  if (isDetailView) {
-    return (
-      <ReviewDetail 
-        review={viewing}
-        onClose={() => window.history.back()}
-      />
-    );
-  }
-
   return (
-    <>
-      <ReviewList onAdd={handleAdd} onEdit={handleEdit} onShow={handleShow} />
-      {viewing && (
-        <ReviewDetail 
-          review={viewing}
-          onClose={handleDetailClose}
-        />
-      )}
-    </>
+    <ReviewList onAdd={handleAdd} onEdit={handleEdit} onShow={handleShow} />
   );
 }

@@ -48,6 +48,7 @@ const router = createBrowserRouter([
       // 👇 Main Services (bilingual)
       { path: "/mainservices", element: <MainServices /> },
       { path: "/mainservices/form", element: <MainServices /> },
+      { path: "/mainservices/:id", element: <MainServices /> },
       { path: "/faq", element: <FAQ /> },
       { path: "/faq/form", element: <FAQ /> },
       { path: "/faq/:id", element: <FAQ /> },

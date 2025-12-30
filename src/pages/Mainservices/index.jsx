@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import ServiceForm from "./mainservicesform";
 import ServiceList from "./mainserviceslist";
 import FeatureDetail from "./FeatureDetail";
@@ -7,12 +7,21 @@ import { useFeatureStore } from "../../stors/useFeatureStore";
 
 export default function Services() {
   const location = useLocation();
+  const params = useParams();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [editingService, setEditingService] = useState(null);
-  const [viewingFeature, setViewingFeature] = useState(null);
   const { fetchfeatures } = useFeatureStore();
 
   const isForm = location.pathname.includes("/form") || showForm;
+  const isDetail = !!params.id;
+
+  // Load features on component mount
+  useEffect(() => {
+    if (!isDetail) {
+      fetchfeatures().catch(e => console.error("Error loading features:", e));
+    }
+  }, [isDetail, fetchfeatures]);
 
   const handleEdit = (service) => {
     setEditingService(service);
@@ -20,11 +29,7 @@ export default function Services() {
   };
 
   const handleShow = (feature) => {
-    setViewingFeature(feature);
-  };
-
-  const handleDetailClose = () => {
-    setViewingFeature(null);
+    navigate(`/mainservices/${feature.id || feature._id}`);
   };
 
   const handleAdd = () => {
@@ -35,9 +40,17 @@ export default function Services() {
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditingService(null);
-    // Refresh the features list after successful create/update
     fetchfeatures();
+    // If we're on a detail page, navigate back to list
+    if (isDetail) {
+      navigate("/mainservices");
+    }
   };
+
+  // Show detail page
+  if (isDetail) {
+    return <FeatureDetail />;
+  }
 
   if (isForm) {
     return (
@@ -49,14 +62,6 @@ export default function Services() {
   }
 
   return (
-    <>
-      <ServiceList onEdit={handleEdit} onAdd={handleAdd} onShow={handleShow} />
-      {viewingFeature && (
-        <FeatureDetail 
-          feature={viewingFeature}
-          onClose={handleDetailClose}
-        />
-      )}
-    </>
+    <ServiceList onEdit={handleEdit} onAdd={handleAdd} onShow={handleShow} />
   );
 }
