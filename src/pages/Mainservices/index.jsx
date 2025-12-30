@@ -4,7 +4,6 @@ import ServiceForm from "./featuresform";
 import ServiceList from "./featureslist";
 import FeatureDetail from "./FeatureDetail";
 import { useFeatureStore } from "../../stors/useFeatureStore";
-import Toaster from "../../components/ui/Toaster/Toaster";
 
 export default function Services() {
   const location = useLocation();
@@ -48,30 +47,19 @@ export default function Services() {
 
   // Show detail page
   if (isDetail) {
-    return (
-      <>
-        <Toaster position="bottom-right" />
-        <FeatureDetail />
-      </>
-    );
+    return <FeatureDetail />;
   }
 
   if (isForm) {
     return (
-      <>
-        <Toaster position="bottom-right" />
-        <ServiceForm
-          serviceId={editingService?.id}
-          onSuccess={handleFormSuccess}
-        />
-      </>
+      <ServiceForm
+        serviceId={editingService?.id}
+        onSuccess={handleFormSuccess}
+      />
     );
   }
 
   return (
-    <>
-      <Toaster position="bottom-right" />
-      <ServiceList onEdit={handleEdit} onAdd={handleAdd} onShow={handleShow} />
-    </>
+    <ServiceList onEdit={handleEdit} onAdd={handleAdd} onShow={handleShow} />
   );
 }

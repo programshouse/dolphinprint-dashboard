@@ -4,7 +4,6 @@ import { useFeatureStore } from "../../stors/useFeatureStore";
 import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import { ArrowLeft, Edit } from "lucide-react";
-import Toaster from "../../components/ui/Toaster/Toaster";
 
 export default function FeatureDetail() {
   const { id } = useParams();
@@ -23,8 +22,7 @@ export default function FeatureDetail() {
 
   if (loading) {
     return (
-      <PageLayout title="Feature Details | Dolphin Print">
-        <Toaster position="bottom-right" />
+    <PageLayout title="Feature Details | Dolphin Print">
         <PageHeader
           title="Feature Details"
           description="Loading feature information..."
@@ -71,7 +69,6 @@ export default function FeatureDetail() {
     <PageLayout
       title={`${feature.title_en || feature.title || "Feature"} | Dolphin Print`}
     >
-      <Toaster position="bottom-right" />
 
       <div className="col-span-12">
         {/* Header with navigation */}

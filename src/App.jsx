@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
-import {
-  Navigate,
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
+import { Navigate, createBrowserRouter, RouterProvider } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
+
+import Toaster from "./components/ui/Toaster/Toaster";
 import { useAuthStore } from "./stors/useAuthStore.js";
+
 import SignIn from "./pages/AuthPages/Signin";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -13,14 +12,11 @@ import Card from "./components/ui/card.jsx";
 import AppLayout from "./layout/AppLayout";
 import Home from "./pages/Dashboard/Home";
 import Services from "./pages/Services";
-import Contact from "./pages/Contact";
 import Reviews from "./pages/reviews";
 import Settings from "./pages/Settings/SettingsList.jsx";
 import SettingsForm from "./pages/Settings/SettingsForm.jsx";
-// 👇 NEW: Main Services (index toggles list/form internally)
-import MainServices from "./pages/mainservices"; // <— make sure this path matches your folder
+import MainServices from "./pages/mainservices";
 import FAQ from "./pages/FAQ/index.jsx";
-
 
 // GuestOnlyRoute: only guests (not logged-in)
 const GuestOnlyRoute = ({ children }) => {
@@ -35,7 +31,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
 
-      // Services (single-language)
+      // Services
       { path: "/services", element: <Services /> },
       { path: "/services/form", element: <Services /> },
       { path: "/services/:id", element: <Services /> },
@@ -45,21 +41,24 @@ const router = createBrowserRouter([
       { path: "/reviews/form", element: <Reviews /> },
       { path: "/reviews/:id", element: <Reviews /> },
 
-      // 👇 Main Services (bilingual)
+      // Main Services
       { path: "/mainservices", element: <MainServices /> },
       { path: "/mainservices/form", element: <MainServices /> },
       { path: "/mainservices/:id", element: <MainServices /> },
+
+      // FAQ
       { path: "/faq", element: <FAQ /> },
       { path: "/faq/form", element: <FAQ /> },
       { path: "/faq/:id", element: <FAQ /> },
 
-         // Contact form
+      // Contact form
       { path: "/form", element: <SettingsForm /> },
 
       // Settings
       { path: "/settings", element: <Settings /> },
       { path: "/settings/form", element: <SettingsForm /> },
-      // Demo card page
+
+      // Demo
       { path: "/card", element: <Card /> },
     ],
   },
@@ -94,8 +93,13 @@ export default function App() {
     return () => clearInterval(interval);
   }, [checkSession, loadUserFromStorage]);
 
-  if (!isInitialized) {
-    return <div>Loading...</div>;
-  }
-  return <RouterProvider router={router} />;
+  if (!isInitialized) return <div>Loading...</div>;
+
+  return (
+    <>
+      {/* ✅ ONE TOASTER FOR WHOLE APP */}
+      <Toaster position="bottom-right" />
+      <RouterProvider router={router} />
+    </>
+  );
 }

@@ -112,8 +112,6 @@ export default function SettingsList({ onEdit }) {
 
   return (
     <div title="Site Settings | Dolphin Print">
-      <Toaster position="bottom-right" />
-
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <PageHeader title="Site Settings" description="View and manage site contact/info settings">
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">

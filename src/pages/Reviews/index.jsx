@@ -4,8 +4,6 @@ import ReviewForm from "./ReviewForm";
 import ReviewList from "./ReviewList";
 import ReviewDetail from "./ReviewDetail";
 import { useReviewStore } from "../../stors/useReviewStore";
-import Toaster from "../../components/ui/Toaster/Toaster";
-import { toast } from "react-toastify";
 
 export default function Reviews() {
   const { id } = useParams();
@@ -21,7 +19,6 @@ export default function Reviews() {
   const isFormRoute = location.pathname.includes("/form");
   const isForm = isFormRoute || showForm;
 
-  // Load list when not in detail
   useEffect(() => {
     if (!isDetail) {
       getAllReviews().catch((e) => console.error("Error loading reviews:", e));
@@ -32,7 +29,6 @@ export default function Reviews() {
     setEditing(null);
     setShowForm(true);
     clearReview();
-    // optional: if you want URL to reflect the form
     navigate("/reviews/form");
   };
 
@@ -47,7 +43,6 @@ export default function Reviews() {
       );
     }
 
-    // optional: if you want URL to reflect the form
     navigate("/reviews/form");
   };
 
@@ -57,56 +52,30 @@ export default function Reviews() {
     navigate(`/reviews/${rid}`);
   };
 
-  // ✅ called from ReviewForm after create/update
-  const handleFormSuccess = (mode) => {
+  const handleFormSuccess = () => {
     setShowForm(false);
     setEditing(null);
     clearReview();
-
-    if (mode === "update") toast.success("Review updated successfully!");
-    else toast.success("Review created successfully!");
-
-    // refresh list then go back to list
     getAllReviews();
-
-    // ✅ navigate immediately (no timeout) so form disappears right away
     navigate("/reviews");
   };
 
-  // Detail view (route /reviews/:id)
-  if (isDetail) {
-    return (
-      <>
-        <Toaster position="bottom-right" />
-        <ReviewDetail />
-      </>
-    );
-  }
+  if (isDetail) return <ReviewDetail />;
 
-  // Form view (route /reviews/form OR local showForm)
   if (isForm) {
     return (
-      <>
-        <Toaster position="bottom-right" />
-        <ReviewForm
-          reviewId={editing?.id || editing?._id}
-          onSuccess={handleFormSuccess}
-          onCancel={() => {
-            setShowForm(false);
-            setEditing(null);
-            clearReview();
-            navigate("/reviews");
-          }}
-        />
-      </>
+      <ReviewForm
+        reviewId={editing?.id || editing?._id}
+        onSuccess={handleFormSuccess}
+        onCancel={() => {
+          setShowForm(false);
+          setEditing(null);
+          clearReview();
+          navigate("/reviews");
+        }}
+      />
     );
   }
 
-  // List view
-  return (
-    <>
-      <Toaster position="bottom-right" />
-      <ReviewList onAdd={handleAdd} onEdit={handleEdit} onShow={handleShow} />
-    </>
-  );
+  return <ReviewList onAdd={handleAdd} onEdit={handleEdit} onShow={handleShow} />;
 }

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
 import { useServicesStore } from "../../stors/useServicesStore";
-import { toast } from "react-toastify";
 
 export default function ServiceForm({ serviceId, onSuccess, onCancel }) {
   const [formData, setFormData] = useState({
@@ -72,16 +71,13 @@ export default function ServiceForm({ serviceId, onSuccess, onCancel }) {
 
       if (serviceId) {
         await updateService(serviceId, formData);
-        toast.success("Service updated successfully!");
       } else {
         await createService(formData);
-        toast.success("Service created successfully!");
       }
 
       onSuccess?.();
     } catch (error) {
       console.error("Error saving service:", error);
-      toast.error("Failed to save service. Please try again.");
     } finally {
       setSaving(false);
     }

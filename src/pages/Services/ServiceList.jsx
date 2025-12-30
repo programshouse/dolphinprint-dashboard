@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import AdminTable from "../../components/ui/AdminTable";
-import { toast } from "react-toastify";
 import { useServicesStore } from "../../stors/useServicesStore";
 
 export default function ServiceList({ onEdit, onAdd, onShow }) {
@@ -21,7 +20,6 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
   const handleDelete = async (service) => {
     const serviceId = service?.id || service?._id;
     if (!serviceId) {
-      toast.error("Service ID not found.");
       return;
     }
 
@@ -107,22 +105,7 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
           title="Services Management"
           description="Manage services that appear on the website"
         />
-        <div className="col-span-12">
-          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
-            <div className="text-red-600 dark:text-red-400 text-6xl mb-4">⚠</div>
-            <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
-              Failed to Load Services
-            </h3>
-            <p className="text-red-700 dark:text-red-300 mb-4">{error}</p>
-            <button
-              type="button"
-              onClick={() => getAllServices()}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
+
       </PageLayout>
     );
   }
