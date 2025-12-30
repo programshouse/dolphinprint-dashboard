@@ -38,6 +38,7 @@ const router = createBrowserRouter([
       // Services (single-language)
       { path: "/services", element: <Services /> },
       { path: "/services/form", element: <Services /> },
+      { path: "/services/:id", element: <Services /> },
 
       // Reviews
       { path: "/reviews", element: <Reviews /> },
@@ -48,6 +49,8 @@ const router = createBrowserRouter([
       { path: "/mainservices", element: <MainServices /> },
       { path: "/mainservices/form", element: <MainServices /> },
       { path: "/faq", element: <FAQ /> },
+      { path: "/faq/form", element: <FAQ /> },
+      { path: "/faq/:id", element: <FAQ /> },
 
          // Contact form
       { path: "/form", element: <SettingsForm /> },
@@ -57,8 +60,6 @@ const router = createBrowserRouter([
       { path: "/settings/form", element: <SettingsForm /> },
       // Demo card page
       { path: "/card", element: <Card /> },
-      { path: "/faq", element: <FAQ /> },
-      { path: "/faq/form", element: <FAQ /> },
     ],
   },
   {

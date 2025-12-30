@@ -4,6 +4,13 @@ import { toast } from "react-toastify";
 
 const API_URL = "https://www.programshouse.com/dashboards/dolphin/api";
 
+const extractData = (json) => {
+  // Handle different response structures
+  if (json?.data) return json.data;
+  if (json?.data?.data) return json.data.data;
+  return json;
+};
+
 const getToken = () => {
   const token =
     localStorage.getItem("access_token") ||
@@ -56,9 +63,13 @@ export const useFaqStore = create((set) => ({
       const res = await axios.get(`${API_URL}/faqs/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      set({ currentFaq: res.data.data, loading: false });
+      
+      const faqData = extractData(res.data);
+      console.log("FAQ data received:", faqData); // Debug log
+      set({ currentFaq: faqData, loading: false });
       return res.data;
     } catch (err) {
+      console.error("Error fetching FAQ:", err); // Debug log
       set({
         error: err.response?.data?.message || "Failed to fetch FAQ",
         loading: false,

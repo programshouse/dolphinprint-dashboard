@@ -88,23 +88,72 @@ export default function ServiceDetail() {
           {/* Title Section */}
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              {service.title}
+              {service.title_en || service.title}
             </h2>
+            {service.title_ar && (
+              <h3 className="text-lg font-medium text-gray-600 dark:text-gray-400" dir="rtl">
+                {service.title_ar}
+              </h3>
+            )}
           </div>
 
           {/* Content Sections */}
           <div className="p-6 space-y-8">
-            {/* Description */}
+            {/* English Version */}
             <div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
-                Description
+                English Details
               </h3>
-              <div className="prose prose-gray dark:prose-invert max-w-none">
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                  {service.description}
-                </p>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Title (English)
+                  </h4>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {service.title_en || service.title || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                    Description (English)
+                  </h4>
+                  <div className="prose prose-gray dark:prose-invert max-w-none">
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                      {service.description_en || service.description || "N/A"}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* Arabic Version */}
+            {(service.title_ar || service.description_ar) && (
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+                  Arabic Details
+                </h3>
+                <div className="space-y-4" dir="rtl">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                      العنوان (العربية)
+                    </h4>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {service.title_ar || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                      الوصف (العربية)
+                    </h4>
+                    <div className="prose prose-gray dark:prose-invert max-w-none">
+                      <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                        {service.description_ar || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Image */}
             {service.image && (
@@ -115,15 +164,23 @@ export default function ServiceDetail() {
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                   <img
                     src={service.image}
-                    alt={service.title}
+                    alt={service.title_en || service.title}
                     className="w-full max-w-2xl h-auto object-cover"
                   />
                 </div>
               </div>
             )}
 
-            {/* Metadata */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            {/* Complete Metadata */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                  Service ID
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 font-mono text-sm">
+                  {service.id || service._id || "N/A"}
+                </p>
+              </div>
               <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
                   Created At
@@ -133,7 +190,9 @@ export default function ServiceDetail() {
                     ? new Date(service.created_at).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
-                        day: 'numeric'
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
                       })
                     : 'N/A'
                   }
@@ -148,13 +207,24 @@ export default function ServiceDetail() {
                     ? new Date(service.updated_at).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
-                        day: 'numeric'
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
                       })
                     : 'N/A'
                   }
                 </p>
               </div>
             </div>
+
+            {/* Additional Fields (if any) */}
+            {Object.keys(service).filter(key => 
+              !['id', '_id', 'title_en', 'title_ar', 'title', 'description_en', 'description_ar', 'description', 'image', 'created_at', 'updated_at'].includes(key)
+            ).length > 0 && (
+              <div>
+
+              </div>
+            )}
           </div>
         </div>
       </div>

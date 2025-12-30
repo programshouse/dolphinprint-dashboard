@@ -15,13 +15,19 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
     if (onShow) onShow(feature);
   };
 
-  const handleDelete = async (svc) => {
-    if (!window.confirm(`Delete "${svc.title_en || svc.title || "feature"}?`))
+  const handleDelete = async (feature) => {
+    console.log("Delete feature called with:", feature);
+    const featureId = feature.id || feature._id;
+    console.log("Feature ID to delete:", featureId);
+    
+    if (!window.confirm(`Delete "${feature.title_en || feature.title || "feature"}?`))
       return;
     try {
-      await deletefeatures(svc.id);
+      await deletefeatures(featureId);
+      console.log("Feature deleted successfully");
     } catch (e) {
       console.error("Error deleting feature:", e);
+      alert("Failed to delete feature. Please try again.");
     }
   };
 
