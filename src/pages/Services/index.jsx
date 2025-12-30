@@ -4,33 +4,45 @@ import ServiceForm from "./ServiceForm";
 import ServiceList from "./ServiceList";
 import ServiceDetail from "./ServiceDetail";
 import { useServicesStore } from "../../stors/useServicesStore";
+import Toaster from "../../components/ui/Toaster/Toaster";
 
 export default function Services() {
   const location = useLocation();
   const params = useParams();
   const navigate = useNavigate();
+
   const [showForm, setShowForm] = useState(false);
   const [editingService, setEditingService] = useState(null);
-  const { getAllServices } = useServicesStore();
 
-  const isForm = location.pathname.includes("/form") || showForm;
+  const { getAllServices, getServiceById } = useServicesStore();
+
   const isDetail = !!params.id;
+  const isFormRoute = location.pathname.includes("/form");
+  const isForm = isFormRoute || showForm;
 
-  // Load services on component mount
   useEffect(() => {
     if (!isDetail) {
-      getAllServices().catch(e => console.error("Error loading services:", e));
+      getAllServices().catch((e) => console.error("Error loading services:", e));
     }
   }, [isDetail, getAllServices]);
 
-  const handleEdit = (service) => {
+  const handleEdit = async (service) => {
     setEditingService(service);
     setShowForm(true);
+
+    // ensure service exists in store if needed
+    const id = service?.id || service?._id;
+    if (id && getServiceById) {
+      try { await getServiceById(id); } catch {}
+    }
+
+    navigate("/services/form");
   };
 
   const handleAdd = () => {
     setEditingService(null);
     setShowForm(true);
+    navigate("/services/form");
   };
 
   const handleShow = (service) => {
@@ -41,27 +53,39 @@ export default function Services() {
     setShowForm(false);
     setEditingService(null);
     getAllServices();
-    // If we're on a detail page, navigate back to list
-    if (isDetail) {
-      navigate("/services");
-    }
+    navigate("/services");
   };
 
-  // Show detail page
   if (isDetail) {
-    return <ServiceDetail />;
+    return (
+      <>
+        <Toaster position="bottom-right" />
+        <ServiceDetail />
+      </>
+    );
   }
 
   if (isForm) {
     return (
-      <ServiceForm
-        serviceId={editingService?.id}
-        onSuccess={handleFormSuccess}
-      />
+      <>
+        <Toaster position="bottom-right" />
+        <ServiceForm
+          serviceId={editingService?.id || editingService?._id}
+          onSuccess={handleFormSuccess}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingService(null);
+            navigate("/services");
+          }}
+        />
+      </>
     );
   }
 
   return (
-    <ServiceList onEdit={handleEdit} onAdd={handleAdd} onShow={handleShow} />
+    <>
+      <Toaster position="bottom-right" />
+      <ServiceList onEdit={handleEdit} onAdd={handleAdd} onShow={handleShow} />
+    </>
   );
 }

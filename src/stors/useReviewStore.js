@@ -126,13 +126,23 @@ export const useReviewStore = create((set) => ({
   updateReview: async (id, data) => {
     if (!id) throw new Error("updateReview: missing id");
 
+    console.log("updateReview called with:", { id, data });
+
     set({ loading: true, error: null, updatedReview: null });
 
     try {
       const isFormData = data instanceof FormData;
       let res;
 
+      console.log("isFormData:", isFormData);
+
       if (isFormData) {
+        // Log FormData contents for debugging
+        console.log("FormData contents:");
+        for (let [key, value] of data.entries()) {
+          console.log(`${key}:`, value instanceof File ? value.name : value);
+        }
+
         if (!data.has("_method")) data.append("_method", "PATCH");
 
         res = await api.post(`/reviews/${id}`, data, {
@@ -143,6 +153,8 @@ export const useReviewStore = create((set) => ({
           headers: { "Content-Type": "application/json" },
         });
       }
+
+      console.log("Update response:", res.data);
 
       let updated = extractData(res.data);
 
@@ -171,6 +183,7 @@ export const useReviewStore = create((set) => ({
       toast.success("Review updated successfully!");
       return updated;
     } catch (err) {
+      console.error("Update review error:", err);
       const msg =
         err?.response?.data?.message || err?.message || "Failed to update review";
       set({ error: msg, loading: false });

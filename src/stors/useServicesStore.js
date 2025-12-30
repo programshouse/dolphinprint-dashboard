@@ -1,20 +1,7 @@
 // src/stors/useServicesStore.js
 import { create } from "zustand";
 import { toast } from "react-toastify";
-
-const API_URL = "https://www.programshouse.com/dashboards/dolphin/api";
-
-const getToken = () => {
-  const token =
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("admin_token") ||
-    localStorage.getItem("token");
-
-  // Basic JWT format check
-  if (token && token.split(".").length === 3) return token;
-
-  return null;
-};
+import { getApiUrl, getAuthHeaders, getAuthToken } from "../config/api";
 
 const pickFile = (img) => {
   if (!img) return null;
@@ -52,16 +39,13 @@ export const useServicesStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      const token = getToken();
+      const token = getAuthToken();
       if (!token) {
         throw new Error("No valid authentication token found. Please login again.");
       }
 
-      const response = await fetch(`${API_URL}/services`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
+      const response = await fetch(getApiUrl("/services"), {
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -103,14 +87,11 @@ export const useServicesStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      const token = getToken();
+      const token = getAuthToken();
       if (!token) throw new Error("No valid authentication token found. Please login again.");
 
-      const response = await fetch(`${API_URL}/services/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
+      const response = await fetch(getApiUrl(`/services/${id}`), {
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -135,7 +116,7 @@ export const useServicesStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      const token = getToken();
+      const token = getAuthToken();
       if (!token) throw new Error("No valid authentication token found. Please login again.");
 
       const file = pickFile(serviceData?.image);
@@ -149,7 +130,7 @@ export const useServicesStore = create((set, get) => ({
         formData.append("description_ar", serviceData?.description_ar ?? "");
         formData.append("image", file); // ✅ image
 
-        response = await fetch(`${API_URL}/services`, {
+        response = await fetch(getApiUrl("/services"), {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -158,7 +139,7 @@ export const useServicesStore = create((set, get) => ({
           body: formData,
         });
       } else {
-        response = await fetch(`${API_URL}/services`, {
+        response = await fetch(getApiUrl("/services"), {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -203,7 +184,7 @@ export const useServicesStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      const token = getToken();
+      const token = getAuthToken();
       if (!token) throw new Error("No valid authentication token found. Please login again.");
 
       const file = pickFile(serviceData?.image);
@@ -221,7 +202,7 @@ export const useServicesStore = create((set, get) => ({
         formData.append("image", file); // ✅ image (not Image)
         formData.append("_method", "PUT");
 
-        response = await fetch(`${API_URL}/services/${id}`, {
+        response = await fetch(getApiUrl(`/services/${id}`), {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -230,7 +211,7 @@ export const useServicesStore = create((set, get) => ({
         });
       } else {
         // text-only update
-        response = await fetch(`${API_URL}/services/${id}`, {
+        response = await fetch(getApiUrl(`/services/${id}`), {
           method: "PATCH",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -291,15 +272,12 @@ export const useServicesStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      const token = getToken();
+      const token = getAuthToken();
       if (!token) throw new Error("No valid authentication token found. Please login again.");
 
-      const response = await fetch(`${API_URL}/services/${id}`, {
+      const response = await fetch(getApiUrl(`/services/${id}`), {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {

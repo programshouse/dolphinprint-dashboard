@@ -4,59 +4,109 @@ import ReviewForm from "./ReviewForm";
 import ReviewList from "./ReviewList";
 import ReviewDetail from "./ReviewDetail";
 import { useReviewStore } from "../../stors/useReviewStore";
+import Toaster from "../../components/ui/Toaster/Toaster";
+import { toast } from "react-toastify";
 
 export default function Reviews() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { getAllReviews } = useReviewStore();
+
+  const { getAllReviews, clearReview, getReviewById } = useReviewStore();
+
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
 
-  const isForm = location.pathname.includes("/form") || showForm;
-  const isDetail = !!id;
+  const isDetail = Boolean(id);
+  const isFormRoute = location.pathname.includes("/form");
+  const isForm = isFormRoute || showForm;
 
-  // Load reviews on component mount
+  // Load list when not in detail
   useEffect(() => {
     if (!isDetail) {
-      getAllReviews().catch(e => console.error("Error loading reviews:", e));
+      getAllReviews().catch((e) => console.error("Error loading reviews:", e));
     }
   }, [isDetail, getAllReviews]);
 
   const handleAdd = () => {
     setEditing(null);
     setShowForm(true);
+    clearReview();
+    // optional: if you want URL to reflect the form
+    navigate("/reviews/form");
   };
 
   const handleEdit = (review) => {
     setEditing(review);
     setShowForm(true);
+
+    const rid = review?.id || review?._id;
+    if (rid) {
+      getReviewById(rid).catch((e) =>
+        console.error("Error loading review for edit:", e)
+      );
+    }
+
+    // optional: if you want URL to reflect the form
+    navigate("/reviews/form");
   };
 
   const handleShow = (review) => {
-    navigate(`/reviews/${review.id || review._id}`);
+    const rid = review?.id || review?._id;
+    if (!rid) return;
+    navigate(`/reviews/${rid}`);
   };
 
-  const handleFormSuccess = () => {
+  // ✅ called from ReviewForm after create/update
+  const handleFormSuccess = (mode) => {
     setShowForm(false);
     setEditing(null);
+    clearReview();
+
+    if (mode === "update") toast.success("Review updated successfully!");
+    else toast.success("Review created successfully!");
+
+    // refresh list then go back to list
     getAllReviews();
-    // If we're on a detail page, navigate back to list
-    if (isDetail) {
-      navigate("/reviews");
-    }
+
+    // ✅ navigate immediately (no timeout) so form disappears right away
+    navigate("/reviews");
   };
 
-  // Show detail page
+  // Detail view (route /reviews/:id)
   if (isDetail) {
-    return <ReviewDetail />;
+    return (
+      <>
+        <Toaster position="bottom-right" />
+        <ReviewDetail />
+      </>
+    );
   }
 
+  // Form view (route /reviews/form OR local showForm)
   if (isForm) {
-    return <ReviewForm reviewId={editing?.id} onSuccess={handleFormSuccess} />;
+    return (
+      <>
+        <Toaster position="bottom-right" />
+        <ReviewForm
+          reviewId={editing?.id || editing?._id}
+          onSuccess={handleFormSuccess}
+          onCancel={() => {
+            setShowForm(false);
+            setEditing(null);
+            clearReview();
+            navigate("/reviews");
+          }}
+        />
+      </>
+    );
   }
 
+  // List view
   return (
-    <ReviewList onAdd={handleAdd} onEdit={handleEdit} onShow={handleShow} />
+    <>
+      <Toaster position="bottom-right" />
+      <ReviewList onAdd={handleAdd} onEdit={handleEdit} onShow={handleShow} />
+    </>
   );
 }

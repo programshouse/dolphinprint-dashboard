@@ -27,7 +27,6 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
       console.log("Feature deleted successfully");
     } catch (e) {
       console.error("Error deleting feature:", e);
-      alert("Failed to delete feature. Please try again.");
     }
   };
 
@@ -37,11 +36,11 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
       header: "Title (EN)",
       render: (s) => s.title_en || s.title || <span className="text-gray-400">—</span>,
     },
-    {
-      key: "title_ar",
-      header: "العنوان (AR)",
-      render: (s) => s.title_ar || <span className="text-gray-400">—</span>,
-    },
+    // {
+    //   key: "title_ar",
+    //   header: "العنوان (AR)",
+    //   render: (s) => s.title_ar || <span className="text-gray-400">—</span>,
+    // },
     {
       key: "description_en",
       header: "Description (EN)",
@@ -51,15 +50,15 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
         </div>
       ),
     },
-    {
-      key: "description_ar",
-      header: "الوصف (AR)",
-      render: (s) => (
-        <div className="max-w-xs truncate" title={s.description_ar || ""}>
-          {s.description_ar || "—"}
-        </div>
-      ),
-    },
+    // {
+    //   key: "description_ar",
+    //   header: "الوصف (AR)",
+    //   render: (s) => (
+    //     <div className="max-w-xs truncate" title={s.description_ar || ""}>
+    //       {s.description_ar || "—"}
+    //     </div>
+    //   ),
+    // },
     {
       key: "image",
       header: "Image",
@@ -94,14 +93,14 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
   }
 
   return (
-    <PageLayout title="Services Management | Dolphin Print">
+    <PageLayout title="Features Management | Dolphin Print">
       <PageHeader
-        title="Services Management"
-        description="Manage services that appear on the website"
+        title="Features Management"
+        description="Manage features that appear on website"
       />
       <div className="col-span-12">
         <AdminTable
-          title="Services"
+          title="Features"
           data={featuresList || []}
           columns={columns}
           onEdit={onEdit}

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import ServiceForm from "./mainservicesform";
-import ServiceList from "./mainserviceslist";
+import ServiceForm from "./featuresform";
+import ServiceList from "./featureslist";
 import FeatureDetail from "./FeatureDetail";
 import { useFeatureStore } from "../../stors/useFeatureStore";
+import Toaster from "../../components/ui/Toaster/Toaster";
 
 export default function Services() {
   const location = useLocation();
@@ -41,27 +42,36 @@ export default function Services() {
     setShowForm(false);
     setEditingService(null);
     fetchfeatures();
-    // If we're on a detail page, navigate back to list
-    if (isDetail) {
-      navigate("/mainservices");
-    }
+    // Always navigate back to features list after successful operation
+    navigate("/mainservices");
   };
 
   // Show detail page
   if (isDetail) {
-    return <FeatureDetail />;
+    return (
+      <>
+        <Toaster position="bottom-right" />
+        <FeatureDetail />
+      </>
+    );
   }
 
   if (isForm) {
     return (
-      <ServiceForm
-        serviceId={editingService?.id}
-        onSuccess={handleFormSuccess}
-      />
+      <>
+        <Toaster position="bottom-right" />
+        <ServiceForm
+          serviceId={editingService?.id}
+          onSuccess={handleFormSuccess}
+        />
+      </>
     );
   }
 
   return (
-    <ServiceList onEdit={handleEdit} onAdd={handleAdd} onShow={handleShow} />
+    <>
+      <Toaster position="bottom-right" />
+      <ServiceList onEdit={handleEdit} onAdd={handleAdd} onShow={handleShow} />
+    </>
   );
 }

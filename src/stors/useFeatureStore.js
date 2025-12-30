@@ -1,36 +1,9 @@
 // src/stors/useFeatureStore.js
 import { create } from "zustand";
-import axios from "axios";
 import { toast } from "react-toastify";
+import { createApiInstance } from "../config/api";
 
-const API_BASE_URL = "https://www.programshouse.com/dashboards/dolphin/api";
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { Accept: "application/json" },
-});
-
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Response interceptor for error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("access_token");
-      window.location.href = "/signin";
-    }
-    return Promise.reject(error);
-  }
-);
+const api = createApiInstance();
 
 export const useFeatureStore = create((set) => ({
   // State
@@ -97,7 +70,7 @@ export const useFeatureStore = create((set) => ({
         loading: false,
       }));
 
-      toast.success("Our Pros created successfully!");
+      toast.success("features created successfully!");
       return created;
     } catch (err) {
       const errorMsg =
@@ -154,7 +127,7 @@ export const useFeatureStore = create((set) => ({
         loading: false,
       }));
 
-      toast.success("Our Pros updated successfully!");
+      toast.success("features updated successfully!");
       return updated;
     } catch (err) {
       const errorMsg =
@@ -180,7 +153,7 @@ export const useFeatureStore = create((set) => ({
         loading: false,
       }));
 
-      toast.success("Our Pros deleted successfully!");
+      toast.success("features deleted successfully!");
       return true;
     } catch (err) {
       const errorMsg =

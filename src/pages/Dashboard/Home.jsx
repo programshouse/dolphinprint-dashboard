@@ -157,7 +157,7 @@ export default function Home() {
                       <td className="py-3 px-4">
                         <button
                           onClick={() => navigate(`/reviews/${review.id}`)}
-                          className="px-3 py-1 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm"
+                          className="px-3 py-1 rounded-md border border-brand-600 text-brand-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm"
                         >
                           View
                         </button>

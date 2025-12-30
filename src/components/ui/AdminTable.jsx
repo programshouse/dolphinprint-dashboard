@@ -116,7 +116,7 @@ const AdminTable = ({
                           <button
                             type="button"
                             onClick={() => onShow?.(item)}
-                            className="px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            className="px-3 py-2 rounded-md border border-brand-600 text-brand-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                           >
                             View
                           </button>

@@ -4,19 +4,24 @@ import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
 import { useReviewStore } from "../../stors/useReviewStore";
 
-export default function ReviewForm({ reviewId, onSuccess }) {
-  const { loading, createReview, updateReview, getReviewById, review } = useReviewStore();
+export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
+  const { loading, createReview, updateReview, getReviewById, review } =
+    useReviewStore();
+
   const [saving, setSaving] = useState(false);
 
-  // EN / AR fields
-  const [userName, setUserName]       = useState("test 1 user_name");
-  const [descEn, setDescEn]           = useState("test 1 review");
-  const [descAr, setDescAr]           = useState("test 1 review");
-  const [rate, setRate]               = useState(3);
-  const [userImage, setUserImage]             = useState("https://www.programshouse.com/dashboards/dolphin/public/assets/reviews/image/1767012272.png");
-  const [isActive, setIsActive]       = useState("1");
+  // Fields
+  const [userName, setUserName] = useState("");
+  const [descEn, setDescEn] = useState("");
+  const [descAr, setDescAr] = useState("");
+  const [rate, setRate] = useState(3);
+  const [isActive, setIsActive] = useState("1");
 
-  // Load for edit
+  // ✅ Keep existing image (string URL) separate from new file
+  const [userImage, setUserImage] = useState(null); // string (existing) OR null
+  const [newImageFile, setNewImageFile] = useState(null); // File OR null
+
+  // Load review for edit
   useEffect(() => {
     if (!reviewId) return;
     (async () => {
@@ -28,57 +33,95 @@ export default function ReviewForm({ reviewId, onSuccess }) {
     })();
   }, [reviewId, getReviewById]);
 
-  // Update form fields when review data changes
+  // Fill form when review loaded
   useEffect(() => {
     if (!review) return;
-    setUserName(review?.user_name || review?.name_en || review?.name || "test 1 user_name");
-    setDescEn(review?.review_en || review?.description_en || review?.description || "test 1 review");
-    setDescAr(review?.review_ar || review?.description_ar || "test 1 review");
-    setRate(review?.rate || 3);
-    setUserImage(review?.user_image || review?.image || "https://www.programshouse.com/dashboards/dolphin/public/assets/reviews/image/1767012272.png");
-    setIsActive(review?.is_active || "1");
+
+    setUserName(review?.user_name || review?.name_en || review?.name || "");
+    setDescEn(review?.review_en || review?.description_en || review?.description || "");
+    setDescAr(review?.review_ar || review?.description_ar || "");
+    setRate(Number(review?.rate || 3));
+    setIsActive(review?.is_active ?? "1");
+
+    // ✅ existing image url/string for preview
+    setUserImage(review?.user_image || review?.image || null);
+
+    // ✅ reset new file each time we load a review
+    setNewImageFile(null);
   }, [review]);
 
+  // ✅ Keep your FileUpload as-is, just store the selected File separately
   const onFile = (e) => {
     const f = e.target.files?.[0] || null;
-    setUserImage(f);
+
+    // Optional local validation (doesn't change FileUpload)
+    if (f) {
+      const okTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      // some browsers use image/jpeg for jpg, "image/jpg" is uncommon but kept
+      if (!okTypes.includes(f.type)) {
+        alert("Only jpg, jpeg, png, webp allowed.");
+        e.target.value = "";
+        return;
+      }
+    }
+
+    setNewImageFile(f);
   };
 
   const submit = async (e) => {
     e.preventDefault();
+
     if (!userName.trim() || !descEn.trim() || !descAr.trim()) return;
 
     try {
       setSaving(true);
+
       const fd = new FormData();
-      fd.append("user_name", userName.trim()); // API expects user_name
-      fd.append("review_en", descEn.trim()); // API expects review_en
-      fd.append("review_ar", descAr.trim()); // API expects review_ar
-      fd.append("rate", rate); // Add rating field
-      fd.append("is_active", isActive); // Add is_active field
-      
-      // Handle image field - append if it's a File or if it's a URL string
-      if (userImage instanceof File) {
-        fd.append("user_image", userImage);
-      } else if (typeof userImage === "string" && userImage.trim()) {
-        fd.append("user_image", userImage.trim());
+      fd.append("user_name", userName.trim());
+      fd.append("review_en", descEn.trim());
+      fd.append("review_ar", descAr.trim());
+      fd.append("rate", String(rate));
+      fd.append("is_active", String(isActive));
+
+      // ✅ IMPORTANT FIX:
+      // Only send user_image when user selected a NEW file
+      if (newImageFile instanceof File) {
+        fd.append("user_image", newImageFile);
       }
+
+      // Debug
+      console.log("Submitting review form:", {
+        reviewId,
+        userName,
+        descEn,
+        descAr,
+        rate,
+        isActive,
+        existingImage: userImage,
+        newImageFile: newImageFile instanceof File ? newImageFile.name : null,
+      });
 
       if (reviewId) {
         await updateReview(reviewId, fd);
+        onSuccess?.("update");
       } else {
+        // If API requires image on create, ensure it is provided:
+        // if (!newImageFile) { alert("Please upload an image"); return; }
+
         await createReview(fd);
+        onSuccess?.("create");
       }
-      onSuccess && onSuccess();
     } catch (err) {
-      console.error(err);
-      // Toast is already handled by the store
+      console.error("Error submitting review form:", err);
     } finally {
       setSaving(false);
     }
   };
 
-  const cancel = () => onSuccess && onSuccess();
+  const cancel = () => {
+    if (onCancel) onCancel();
+    else onSuccess?.(); // fallback
+  };
 
   if (loading) {
     return (
@@ -89,11 +132,15 @@ export default function ReviewForm({ reviewId, onSuccess }) {
     );
   }
 
-  const disabled =
-    saving ||
-    !userName.trim() ||
-    !descEn.trim() ||
-    !descAr.trim();
+  const disabled = saving || !userName.trim() || !descEn.trim() || !descAr.trim();
+
+  // For preview: if user picked a new file, show it, else show existing url
+  const previewSrc =
+    newImageFile instanceof File
+      ? URL.createObjectURL(newImageFile)
+      : typeof userImage === "string" && userImage.trim()
+      ? userImage
+      : null;
 
   return (
     <AdminForm
@@ -133,7 +180,9 @@ export default function ReviewForm({ reviewId, onSuccess }) {
             onChange={(e) => setRate(Number(e.target.value))}
             className="flex-1"
           />
-          <span className="text-lg font-semibold text-brand-600 w-8 text-center">{rate}</span>
+          <span className="text-lg font-semibold text-brand-600 w-8 text-center">
+            {rate}
+          </span>
         </div>
         <div className="flex gap-1 mt-2">
           {[1, 2, 3, 4, 5].map((star) => (
@@ -141,7 +190,9 @@ export default function ReviewForm({ reviewId, onSuccess }) {
               key={star}
               type="button"
               onClick={() => setRate(star)}
-              className={`text-2xl ${star <= rate ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-400 transition-colors`}
+              className={`text-2xl ${
+                star <= rate ? "text-yellow-400" : "text-gray-300"
+              } hover:text-yellow-400 transition-colors`}
             >
               ★
             </button>
@@ -167,24 +218,31 @@ export default function ReviewForm({ reviewId, onSuccess }) {
 
       {/* Image */}
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Reviewer Image URL (optional)
-        </label>
-        <input
-          type="url"
-          value={typeof userImage === 'string' ? userImage : ''}
-          onChange={(e) => setUserImage(e.target.value)}
-          placeholder="https://example.com/image.jpg"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-4"
-        />
-        
+        {/* ✅ Preview old or new image without changing FileUpload */}
+        {previewSrc && (
+          <div className="mb-3">
+            <p className="text-sm text-gray-500 mb-2">
+              {newImageFile ? "New image preview:" : "Current image:"}
+            </p>
+            <img
+              src={previewSrc}
+              alt="Preview"
+              className="w-24 h-24 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
+            />
+          </div>
+        )}
+
         <FileUpload
-          label="Or upload new image"
+          label="upload new image"
           name="user_image"
-          value={userImage}
+          value={newImageFile}
           onChange={onFile}
           accept="image/*"
         />
+
+        <p className="text-xs text-gray-500 mt-2">
+          Leave empty to keep the current image (when editing).
+        </p>
       </div>
 
       {/* Descriptions */}

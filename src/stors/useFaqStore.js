@@ -1,26 +1,14 @@
 import { create } from "zustand";
-import axios from "axios";
 import { toast } from "react-toastify";
+import { createApiInstance, API_CONFIG } from "../config/api";
 
-const API_URL = "https://www.programshouse.com/dashboards/dolphin/api";
+const api = createApiInstance();
 
 const extractData = (json) => {
   // Handle different response structures
   if (json?.data) return json.data;
   if (json?.data?.data) return json.data.data;
   return json;
-};
-
-const getToken = () => {
-  const token =
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("admin_token") ||
-    localStorage.getItem("token");
-
-  // Basic JWT format check
-  if (token && token.split(".").length === 3) return token;
-
-  return null;
 };
 
 export const useFaqStore = create((set) => ({
@@ -33,14 +21,8 @@ export const useFaqStore = create((set) => ({
   getFaqs: async () => {
     try {
       set({ loading: true, error: null });
-      const token = getToken();
-      if (!token) {
-        throw new Error("No valid authentication token found. Please login again.");
-      }
       
-      const res = await axios.get(`${API_URL}/faqs`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get("/faqs");
       set({ faqs: Array.isArray(res.data.data) ? res.data.data : res.data, loading: false });
       return res.data;
     } catch (err) {
@@ -57,12 +39,8 @@ export const useFaqStore = create((set) => ({
   getFaqById: async (id) => {
     try {
       set({ loading: true, error: null });
-      const token = getToken();
-      if (!token) throw new Error("No valid authentication token found. Please login again.");
       
-      const res = await axios.get(`${API_URL}/faqs/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get(`/faqs/${id}`);
       
       const faqData = extractData(res.data);
       console.log("FAQ data received:", faqData); // Debug log
@@ -84,18 +62,14 @@ export const useFaqStore = create((set) => ({
     try {
       set({ loading: true, error: null });
       
-      const token = getToken();
-      if (!token) throw new Error("No valid authentication token found. Please login again.");
-      
       const formData = new FormData();
       formData.append('question_en', faqData.question_en);
       formData.append('question_ar', faqData.question_ar);
       formData.append('answer_en', faqData.answer_en);
       formData.append('answer_ar', faqData.answer_ar);
 
-      const res = await axios.post(`${API_URL}/faqs`, formData, {
+      const res = await api.post("/faqs", formData, {
         headers: { 
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         },
       });
@@ -123,9 +97,6 @@ export const useFaqStore = create((set) => ({
     try {
       set({ loading: true, error: null });
       
-      const token = getToken();
-      if (!token) throw new Error("No valid authentication token found. Please login again.");
-      
       const formData = new FormData();
       formData.append('question_en', faqData.question_en);
       formData.append('question_ar', faqData.question_ar);
@@ -133,9 +104,8 @@ export const useFaqStore = create((set) => ({
       formData.append('answer_ar', faqData.answer_ar);
       formData.append('_method', 'PUT'); // Laravel style: POST + _method=PUT
 
-      const res = await axios.post(`${API_URL}/faqs/${id}`, formData, {
+      const res = await api.post(`/faqs/${id}`, formData, {
         headers: { 
-          Authorization: `Bearer ${token}`,
           // Don't set Content-Type for FormData, let axios set it with boundary
         },
       });
@@ -167,12 +137,8 @@ export const useFaqStore = create((set) => ({
   deleteFaq: async (id) => {
     try {
       set({ loading: true, error: null });
-      const token = getToken();
-      if (!token) throw new Error("No valid authentication token found. Please login again.");
       
-      await axios.delete(`${API_URL}/faqs/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/faqs/${id}`);
       
       set(state => ({
         faqs: state.faqs.filter(faq => String(faq.id || faq._id) !== String(id)),

@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import AdminTable from "../../components/ui/AdminTable";
+import { toast } from "react-toastify";
 import { useServicesStore } from "../../stors/useServicesStore";
 
 export default function ServiceList({ onEdit, onAdd, onShow }) {
@@ -13,37 +14,26 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
     getAllServices().catch((e) => console.error("Error loading services:", e));
   }, [getAllServices]);
 
-  // ✅ View button works like FeaturesList (call parent onShow)
   const handleShow = (service) => {
-    if (onShow) onShow(service);
+    onShow?.(service);
   };
 
-  // ✅ Delete receives the service object (NOT index)
   const handleDelete = async (service) => {
-    console.log("Delete service called with:", service);
-
     const serviceId = service?.id || service?._id;
-    console.log("Service ID to delete:", serviceId);
-
     if (!serviceId) {
-      console.error("No service id found:", service);
-      alert("Service ID not found.");
+      toast.error("Service ID not found.");
       return;
     }
 
     const title = service.title_en || service.title_ar || "service";
-
     if (!window.confirm(`Delete "${title}"?`)) return;
 
     try {
       await deleteService(serviceId);
-      console.log("Service deleted successfully");
-
-      // optional: refresh list if your store doesn't remove it automatically
+      // If store doesn't remove it automatically:
       // await getAllServices();
     } catch (e) {
       console.error("Error deleting service:", e);
-      alert("Failed to delete service. Please try again.");
     }
   };
 
@@ -78,7 +68,6 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
       header: "Image",
       render: (s) => {
         const title = s.title_en || s.title_ar || "Service";
-
         return s.image ? (
           <img
             src={typeof s.image === "string" ? s.image : URL.createObjectURL(s.image)}
@@ -120,9 +109,7 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
         />
         <div className="col-span-12">
           <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
-            <div className="text-red-600 dark:text-red-400 text-6xl mb-4">
-              ⚠
-            </div>
+            <div className="text-red-600 dark:text-red-400 text-6xl mb-4">⚠</div>
             <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
               Failed to Load Services
             </h3>
@@ -152,8 +139,8 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
           data={services || []}
           columns={columns}
           onEdit={onEdit}
-          onShow={onShow ? handleShow : undefined}  // ✅ same as your feature list
-          onDelete={handleDelete}                   // ✅ item-based delete
+          onShow={onShow ? handleShow : undefined}
+          onDelete={handleDelete}
           onAdd={onAdd}
           addText="Add New Service"
         />

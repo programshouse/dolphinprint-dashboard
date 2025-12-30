@@ -1,30 +1,32 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import PageCard from "../../components/ui/PageCard";
-import Toaster from "../../components/ui/Toaster/Toaster";
 import { useReviewStore } from "../../stors/useReviewStore";
+import { toast } from "react-toastify";
 
 export default function ReviewList({ onAdd, onEdit, onShow }) {
-  const navigate = useNavigate();
   const { reviews, loading, error, getAllReviews, deleteReview } = useReviewStore();
 
-  useEffect(() => { 
-    getAllReviews().catch(e => console.error("Error loading reviews:", e));
+  useEffect(() => {
+    getAllReviews().catch((e) => console.error("Error loading reviews:", e));
   }, [getAllReviews]);
 
   const handleDelete = async (review) => {
-    if (!window.confirm(`Delete review from "${review.user_name || "Unnamed"}"?`)) return;
-    try {
-      await deleteReview(review.id);
-    } catch (error) {
-      console.error("Error deleting review:", error);
-    }
-  };
+    const rid = review?.id || review?._id;
+    if (!rid) return;
 
-  const handleShow = (review) => {
-    navigate(`/reviews/${review.id}`);
+    if (!window.confirm(`Delete review from "${review.user_name || "Unnamed"}"?`)) return;
+
+    try {
+      await deleteReview(rid);
+      toast.success("Review deleted successfully!");
+      // optional: refresh if store doesn't remove it
+      // await getAllReviews();
+    } catch (e) {
+      console.error("Error deleting review:", e);
+      toast.error("Failed to delete review. Please try again.");
+    }
   };
 
   if (loading) {
@@ -43,7 +45,6 @@ export default function ReviewList({ onAdd, onEdit, onShow }) {
 
   return (
     <PageLayout title="Reviews | Dolphin Print">
-      <Toaster position="bottom-right" />
       <PageHeader title="Reviews" description="What people say about you" />
       <div className="col-span-12">
         <PageCard title="All Reviews">
@@ -69,7 +70,10 @@ export default function ReviewList({ onAdd, onEdit, onShow }) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {reviews.map((r) => (
-                <div key={r.id} className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+                <div
+                  key={r.id || r._id}
+                  className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800"
+                >
                   <div className="flex items-center gap-3">
                     {r.user_image && (
                       <img
@@ -78,12 +82,16 @@ export default function ReviewList({ onAdd, onEdit, onShow }) {
                         className="w-12 h-12 rounded-full object-cover border"
                       />
                     )}
+
                     <div className="flex-1">
-                      <div className="font-semibold text-gray-900 dark:text-white">{r.user_name || "Unnamed"}</div>
+                      <div className="font-semibold text-gray-900 dark:text-white">
+                        {r.user_name || "Unnamed"}
+                      </div>
                     </div>
+
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleShow(r)}
+                        onClick={() => onShow?.(r)}
                         className="px-3 py-1 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                       >
                         View
@@ -102,7 +110,10 @@ export default function ReviewList({ onAdd, onEdit, onShow }) {
                       </button>
                     </div>
                   </div>
-                  <p className="mt-3 text-sm text-gray-700 dark:text-gray-300 line-clamp-5">{r.review_en || r.review_ar}</p>
+
+                  <p className="mt-3 text-sm text-gray-700 dark:text-gray-300 line-clamp-5">
+                    {r.review_en || r.review_ar}
+                  </p>
                 </div>
               ))}
             </div>

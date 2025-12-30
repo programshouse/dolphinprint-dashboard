@@ -5,6 +5,7 @@ import FaqForm from "./faqform";
 import FaqList from "./faqlist";
 import FaqDetail from "./FaqDetail";
 import { useFaqStore } from "../../stors/useFaqStore";
+import Toaster from "../../components/ui/Toaster/Toaster";
 
 export default function FaqPage() {
   const location = useLocation();
@@ -62,10 +63,8 @@ export default function FaqPage() {
     setEditingFaq(null);
     // Refresh the FAQ list after successful create/update
     getFaqs();
-    // If we're on a detail page, navigate back to list
-    if (isDetail) {
-      navigate("/faq");
-    }
+    // Always navigate back to FAQ list after successful operation
+    navigate("/faq");
   };
 
   // Show detail page
@@ -76,50 +75,65 @@ export default function FaqPage() {
     
     if (loading) {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
-            <p className="mt-2 text-gray-600">Loading FAQ...</p>
+        <>
+          <Toaster position="bottom-right" />
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
+              <p className="mt-2 text-gray-600">Loading FAQ...</p>
+            </div>
           </div>
-        </div>
+        </>
       );
     }
 
     if (!currentFaq) {
       console.log("FAQ not found - currentFaq is null/undefined");
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-gray-600 mb-4">FAQ not found</p>
-            <button
-              onClick={() => navigate("/faq")}
-              className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600"
-            >
-              Back to FAQ List
-            </button>
+        <>
+          <Toaster position="bottom-right" />
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-gray-600 mb-4">FAQ not found</p>
+              <button
+                onClick={() => navigate("/faq")}
+                className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600"
+              >
+                Back to FAQ List
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       );
     }
 
     return (
-      <FaqDetail 
-        faq={currentFaq}
-        onClose={handleDetailClose}
-      />
+      <>
+        <Toaster position="bottom-right" />
+        <FaqDetail 
+          faq={currentFaq}
+          onClose={handleDetailClose}
+        />
+      </>
     );
   }
 
   if (isForm) {
     return (
-      <FaqForm
-        faqId={editingFaq?.id || editingFaq?._id}
-        onSuccess={handleFormSuccess}
-      />
+      <>
+        <Toaster position="bottom-right" />
+        <FaqForm
+          faqId={editingFaq?.id || editingFaq?._id}
+          onSuccess={handleFormSuccess}
+        />
+      </>
     );
   }
 
   return (
-    <FaqList onEdit={handleEdit} onAdd={handleAdd} onShow={handleShow} />
+    <>
+      <Toaster position="bottom-right" />
+      <FaqList onEdit={handleEdit} onAdd={handleAdd} onShow={handleShow} />
+    </>
   );
 }

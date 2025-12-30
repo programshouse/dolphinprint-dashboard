@@ -10,7 +10,7 @@ export default function ReviewDetail() {
   const navigate = useNavigate();
   const { reviews, loading } = useReviewStore();
 
-  const review = reviews?.find(r => r.id === parseInt(id));
+const review = reviews?.find(r => String(r.id || r._id) === String(id));
 
   const handleEdit = () => {
     navigate(`/reviews/form`, { state: { editingReview: review } });

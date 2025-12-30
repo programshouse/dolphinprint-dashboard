@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
 import { useServicesStore } from "../../stors/useServicesStore";
+import { toast } from "react-toastify";
 
-export default function ServiceForm({ serviceId, onSuccess }) {
+export default function ServiceForm({ serviceId, onSuccess, onCancel }) {
   const [formData, setFormData] = useState({
     title_en: "",
     title_ar: "",
     description_en: "",
     description_ar: "",
-    image: null, // can be File OR string url (when editing)
+    image: null, // existing string OR File
   });
 
   const {
@@ -26,7 +27,6 @@ export default function ServiceForm({ serviceId, onSuccess }) {
   useEffect(() => {
     const load = async () => {
       try {
-        console.log("Loading service with ID:", serviceId);
         await getServiceById(serviceId);
       } catch (e) {
         console.error("Error loading service:", e);
@@ -42,7 +42,6 @@ export default function ServiceForm({ serviceId, onSuccess }) {
 
   useEffect(() => {
     if (serviceId && service) {
-      console.log("Loading service data into form:", service);
       setFormData({
         title_en: service.title_en || "",
         title_ar: service.title_ar || "",
@@ -58,9 +57,11 @@ export default function ServiceForm({ serviceId, onSuccess }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ✅ FIX: get file from e.target.files[0]
   const handleFileChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name } = e.target;
+    const file = e.target.files?.[0] || null;
+    setFormData((prev) => ({ ...prev, [name]: file }));
   };
 
   const handleSubmit = async (e) => {
@@ -71,20 +72,24 @@ export default function ServiceForm({ serviceId, onSuccess }) {
 
       if (serviceId) {
         await updateService(serviceId, formData);
+        toast.success("Service updated successfully!");
       } else {
         await createService(formData);
+        toast.success("Service created successfully!");
       }
 
-      if (onSuccess) onSuccess();
+      onSuccess?.();
     } catch (error) {
       console.error("Error saving service:", error);
+      toast.error("Failed to save service. Please try again.");
     } finally {
       setSaving(false);
     }
   };
 
   const handleCancel = () => {
-    if (onSuccess) onSuccess();
+    onCancel?.();
+    onSuccess?.(); // fallback to go back
   };
 
   if (loading) {
@@ -103,8 +108,13 @@ export default function ServiceForm({ serviceId, onSuccess }) {
       title={serviceId ? "Edit Service" : "Add New Service"}
       onSubmit={handleSubmit}
       onCancel={handleCancel}
-      submitText={
-        saving ? "Saving..." : serviceId ? "Update Service" : "Create Service"
+      submitText={saving ? "Saving..." : serviceId ? "Update Service" : "Create Service"}
+      submitDisabled={
+        saving ||
+        !formData.title_en.trim() ||
+        !formData.title_ar.trim() ||
+        !formData.description_en.trim() ||
+        !formData.description_ar.trim()
       }
     >
       <div>
