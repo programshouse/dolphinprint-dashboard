@@ -1,6 +1,7 @@
 // src/pages/FAQ/FaqForm.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import AdminForm from "../../components/ui/AdminForm";
+import { toastError } from "../../components/ui/Toaster/Toaster";
 import { useFaqStore } from "../../stors/useFaqStore";
 
 const blankFaq = () => ({
@@ -110,8 +111,6 @@ export default function FaqForm({ faqId, onSuccess, onCancel }) {
     return e; // array of invalid indexes
   }, [faqsForm]);
 
-  const disabled = saving || faqsForm.length === 0 || errs.length > 0;
-
   // Handlers
   const updateField = (idx, key, val) =>
     setFaqsForm((prev) =>
@@ -135,7 +134,25 @@ export default function FaqForm({ faqId, onSuccess, onCancel }) {
   // Submit
   const submit = async (e) => {
     e.preventDefault();
-    if (disabled) return;
+    if (saving) return;
+    if (faqsForm.length === 0) {
+      toastError("Please add at least one FAQ.");
+      return;
+    }
+    if (errs.length > 0) {
+      const invalidIndex = errs[0];
+      const faq = faqsForm[invalidIndex];
+      const missingField = [
+        ["question_en", "Question (English)"],
+        ["question_ar", "Question (Arabic)"],
+        ["answer_en", "Answer (English)"],
+        ["answer_ar", "Answer (Arabic)"],
+      ].find(([key]) => !faq[key].trim());
+      toastError(
+        `Please add ${missingField[1]} for FAQ #${invalidIndex + 1}.`
+      );
+      return;
+    }
 
     try {
       setSaving(true);
@@ -166,7 +183,7 @@ export default function FaqForm({ faqId, onSuccess, onCancel }) {
       onSuccess && onSuccess();
     } catch (err) {
       console.error(err);
-      alert("Error saving FAQ(s). Please try again.");
+      toastError("Error saving FAQ(s). Please try again.");
     } finally {
       setSaving(false);
     }
@@ -188,6 +205,7 @@ export default function FaqForm({ faqId, onSuccess, onCancel }) {
       title={isEditing ? "Edit FAQ" : "Add FAQs"}
       onSubmit={submit}
       onCancel={cancel}
+      noValidate
       submitText={
         saving
           ? "Saving..."
@@ -195,7 +213,7 @@ export default function FaqForm({ faqId, onSuccess, onCancel }) {
           ? "Update FAQ"
           : `Create ${faqsForm.length} FAQ${faqsForm.length > 1 ? "s" : ""}`
       }
-      submitDisabled={disabled}
+      submitDisabled={saving}
     >
       <div className="space-y-5">
         {faqsForm.map((f, i) => {

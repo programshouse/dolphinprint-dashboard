@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
+import { toastError } from "../../components/ui/Toaster/Toaster";
 import { useServicesStore } from "../../stors/useServicesStore";
 
 export default function ServiceForm({ serviceId, onSuccess, onCancel }) {
@@ -66,6 +67,18 @@ export default function ServiceForm({ serviceId, onSuccess, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const missingField = [
+      ["title_en", "Service title (English)"],
+      ["title_ar", "Service title (Arabic)"],
+      ["description_en", "Service description (English)"],
+      ["description_ar", "Service description (Arabic)"],
+    ].find(([field]) => !formData[field].trim());
+
+    if (missingField) {
+      toastError(`Please add ${missingField[1]}.`);
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -104,14 +117,9 @@ export default function ServiceForm({ serviceId, onSuccess, onCancel }) {
       title={serviceId ? "Edit Service" : "Add New Service"}
       onSubmit={handleSubmit}
       onCancel={handleCancel}
+      noValidate
       submitText={saving ? "Saving..." : serviceId ? "Update Service" : "Create Service"}
-      submitDisabled={
-        saving ||
-        !formData.title_en.trim() ||
-        !formData.title_ar.trim() ||
-        !formData.description_en.trim() ||
-        !formData.description_ar.trim()
-      }
+      submitDisabled={saving}
     >
       <div>
         <label className="block text-sm font-medium text-gray-700  mb-2">

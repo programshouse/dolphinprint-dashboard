@@ -105,9 +105,12 @@ export default function SettingsForm({ onSuccess }) {
 
   const valid = useMemo(() => {
     return (
-      (form.site_name_ar.trim().length > 0 || form.site_name_en.trim().length > 0) &&
+      form.site_name_ar.trim().length > 0 &&
+      form.site_name_en.trim().length > 0 &&
+      /^\S+@\S+\.\S+$/.test(form.email.trim()) &&
       form.phone.trim().length > 0 &&
-      (form.address_ar.trim().length > 0 || form.address_en.trim().length > 0)
+      form.address_ar.trim().length > 0 &&
+      form.address_en.trim().length > 0
     );
   }, [form]);
 
@@ -119,7 +122,22 @@ export default function SettingsForm({ onSuccess }) {
       return;
     }
 
-    if (!valid) return;
+    if (!valid) {
+      const missingField = [
+        [form.site_name_ar, "Site name (Arabic)"],
+        [form.site_name_en, "Site name (English)"],
+        [form.email, "a valid email address"],
+        [form.phone, "Phone"],
+        [form.address_ar, "Address (Arabic)"],
+        [form.address_en, "Address (English)"],
+      ].find(([value, label]) =>
+        label === "a valid email address"
+          ? !/^\S+@\S+\.\S+$/.test(value.trim())
+          : !value.trim()
+      );
+      notify.error(`Please add ${missingField[1]}.`);
+      return;
+    }
 
     try {
       setSaving(true);
@@ -143,9 +161,12 @@ export default function SettingsForm({ onSuccess }) {
 
   const validationHint = useMemo(() => {
     if (isReadOnly) return "";
-    if (!form.site_name_ar.trim() && !form.site_name_en.trim()) return "Please enter Site Name (Arabic or English).";
+    if (!form.site_name_ar.trim()) return "Please enter Site Name (Arabic).";
+    if (!form.site_name_en.trim()) return "Please enter Site Name (English).";
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return "Please enter a valid Email.";
     if (!form.phone.trim()) return "Please enter Phone.";
-    if (!form.address_ar.trim() && !form.address_en.trim()) return "Please enter Address (Arabic or English).";
+    if (!form.address_ar.trim()) return "Please enter Address (Arabic).";
+    if (!form.address_en.trim()) return "Please enter Address (English).";
     return "";
   }, [form, isReadOnly]);
 
@@ -169,8 +190,9 @@ export default function SettingsForm({ onSuccess }) {
             title="Site Information"
             onSubmit={submit}
             onCancel={onSuccess}
+            noValidate
             submitText={isReadOnly ? "Close" : saving ? "Saving..." : "Save Settings"}
-            submitDisabled={isReadOnly ? false : saving || !valid}
+            submitDisabled={isReadOnly ? false : saving}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>

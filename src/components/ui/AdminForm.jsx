@@ -7,7 +7,9 @@ const AdminForm = ({
   onCancel,
   submitText = "Save",
   cancelText = "Cancel",
-  className 
+  className,
+  submitDisabled = false,
+  noValidate = false,
 }) => {
   return (
     <div className={`bg-white  rounded-lg shadow-sm border border-gray-200  p-6 ${className}`}>
@@ -15,13 +17,14 @@ const AdminForm = ({
         {title}
       </h2>
       
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6" noValidate={noValidate}>
         {children}
         
         <div className="flex gap-3 pt-4 border-t border-gray-200 ">
           <button
             type="submit"
             className="bg-brand-500 hover:bg-brand-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            disabled={submitDisabled}
           >
             {submitText}
           </button>

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
+import { toastError } from "../../components/ui/Toaster/Toaster";
 import { useReviewStore } from "../../stors/useReviewStore";
 
 export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
@@ -71,7 +72,16 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
   const submit = async (e) => {
     e.preventDefault();
 
-    if (!userName.trim() || !descEn.trim() || !descAr.trim()) return;
+    const missingField = [
+      [userName, "Reviewer name"],
+      [descEn, "Review (English)"],
+      [descAr, "Review (Arabic)"],
+    ].find(([value]) => !value.trim());
+
+    if (missingField) {
+      toastError(`Please add ${missingField[1]}.`);
+      return;
+    }
 
     try {
       setSaving(true);
@@ -132,8 +142,6 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
     );
   }
 
-  const disabled = saving || !userName.trim() || !descEn.trim() || !descAr.trim();
-
   // For preview: if user picked a new file, show it, else show existing url
   const previewSrc =
     newImageFile instanceof File
@@ -147,8 +155,9 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
       title={reviewId ? "Edit Review" : "Add New Review"}
       onSubmit={submit}
       onCancel={cancel}
+      noValidate
       submitText={saving ? "Saving..." : reviewId ? "Update Review" : "Create Review"}
-      submitDisabled={disabled}
+      submitDisabled={saving}
     >
       {/* User Name */}
       <div className="mt-4">

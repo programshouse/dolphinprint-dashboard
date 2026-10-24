@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
+import { toastError } from "../../components/ui/Toaster/Toaster";
 import { useFeatureStore } from "../../stors/useFeatureStore";
 
 const MAX_TITLE = 140;
@@ -47,7 +48,7 @@ export default function ServiceForm({ serviceId, onSuccess, onCancel }) {
       if (getfeatureById) {
         try {
           await getfeatureById(serviceId);
-        } catch (e) {
+        } catch {
           // ignore; we might still have it in list
         }
       }
@@ -98,7 +99,21 @@ export default function ServiceForm({ serviceId, onSuccess, onCancel }) {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (Object.keys(vErr).length) return;
+    if (Object.keys(vErr).length) {
+      const fieldLabels = {
+        titleEN: "Title (English)",
+        titleAR: "Title (Arabic)",
+        descEN: "Description (English)",
+        descAR: "Description (Arabic)",
+      };
+      const [field, message] = Object.entries(vErr)[0];
+      toastError(
+        message === "Required" || message === "مطلوب"
+          ? `Please add ${fieldLabels[field]}.`
+          : `${fieldLabels[field]}: ${message}`
+      );
+      return;
+    }
 
     try {
       setSaving(true);
@@ -153,10 +168,11 @@ export default function ServiceForm({ serviceId, onSuccess, onCancel }) {
       title={serviceId ? "Edit Feature" : "Add New Feature"}
       onSubmit={submit}
       onCancel={cancel}
+      noValidate
       submitText={
         saving ? "Saving..." : serviceId ? "Update Feature" : "Create Feature"
       }
-      submitDisabled={saving || Object.keys(vErr).length > 0}
+      submitDisabled={saving}
     >
       {err && (
         <div className="mb-3 text-sm px-3 py-2 rounded bg-red-50  text-red-700  border border-red-200 ">
