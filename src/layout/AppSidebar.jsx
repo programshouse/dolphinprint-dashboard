@@ -15,7 +15,7 @@ import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
 
 const navItems = [
-  { name: "Home", icon: <MdHome />, path: "/" },
+  // { name: "Home", icon: <MdHome />, path: "/" },
   {
     name: "Features",            // 👈 NEW
     icon: <MdMiscellaneousServices />,

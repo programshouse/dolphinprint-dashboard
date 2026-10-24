@@ -88,14 +88,7 @@ export default function FeatureDetail() {
               </h1>
             </div>
 
-            <button
-              type="button"
-              onClick={handleEdit}
-              className="inline-flex items-center bg-brand-600 hover:bg-brand-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Feature
-            </button>
+
           </div>
         </div>
 
