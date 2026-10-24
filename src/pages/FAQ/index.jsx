@@ -14,7 +14,7 @@ export default function FaqPage() {
   const [editingFaq, setEditingFaq] = useState(null);
   const { getFaqs, getFaqById, currentFaq, loading } = useFaqStore();
 
-  const isForm = location.pathname.includes("/form") || showForm;
+  const isForm = location.pathname.includes("/form");
   const isDetail = !!params.id;
 
   // Load FAQ data when on detail page
@@ -42,6 +42,7 @@ export default function FaqPage() {
   const handleEdit = (faq) => {
     setEditingFaq(faq);
     setShowForm(true);
+    navigate("/faq/form");
   };
 
   const handleShow = (faq) => {
@@ -55,6 +56,7 @@ export default function FaqPage() {
   const handleAdd = () => {
     setEditingFaq(null);
     setShowForm(true);
+    navigate("/faq/form");
   };
 
   const handleFormSuccess = () => {
@@ -113,6 +115,7 @@ export default function FaqPage() {
       <FaqForm
         faqId={editingFaq?.id || editingFaq?._id}
         onSuccess={handleFormSuccess}
+        onCancel={() => { setShowForm(false); navigate("/faq"); }}
       />
     );
   }

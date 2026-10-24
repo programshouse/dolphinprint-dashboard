@@ -3,7 +3,7 @@ import React from "react";
 const PageHeader = ({ 
   title, 
   description, 
-  className = "" 
+  className 
 }) => {
   return (
     <div className={`col-span-12 ${className}`}>

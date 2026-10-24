@@ -6,10 +6,10 @@ const WhoAmICard = ({
   features = [], 
   image = null,
   video = null,
-  className = "" 
+  className 
 }) => {
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 ${className}`}>
+    <div className={`bg-white  rounded-lg shadow-sm border border-gray-200  p-6 ${className}`}>
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Media Section */}
         <div className="lg:w-1/2">
@@ -33,7 +33,7 @@ const WhoAmICard = ({
               />
             </div>
           ) : (
-            <div className="w-full h-64 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+            <div className="w-full h-64 rounded-lg bg-gray-100  flex items-center justify-center">
               <span className="text-gray-400">No media available</span>
             </div>
           )}
@@ -41,23 +41,23 @@ const WhoAmICard = ({
 
         {/* Content Section */}
         <div className="lg:w-1/2">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl font-bold text-gray-900  mb-4">
             {title}
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+          <p className="text-gray-600  mb-6 leading-relaxed">
             {description}
           </p>
           
           {features.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-gray-900 ">
                 Key Features:
               </h3>
               <ul className="space-y-2">
                 {features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-brand-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-600 dark:text-gray-300">
+                    <span className="text-gray-600 ">
                       {feature}
                     </span>
                   </li>

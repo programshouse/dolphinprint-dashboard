@@ -6,7 +6,7 @@ const ServiceCard = ({
   description_en, 
   description_ar,
   image = null,
-  className = "",
+  className,
   onShow,
   onEdit,
   onDelete,
@@ -16,7 +16,7 @@ const ServiceCard = ({
   const description = description_en || description_ar || "No description available";
   
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow ${className}`}>
+    <div className={`bg-white  rounded-lg shadow-sm border border-gray-200  overflow-hidden hover:shadow-md transition-shadow ${className}`}>
       {/* Image Section */}
       <div className="w-full h-48">
         {image ? (
@@ -26,7 +26,7 @@ const ServiceCard = ({
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+          <div className="w-full h-full bg-gray-100  flex items-center justify-center">
             <span className="text-gray-400">No image available</span>
           </div>
         )}
@@ -34,10 +34,10 @@ const ServiceCard = ({
 
       {/* Content Section */}
       <div className="p-6">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+        <h3 className="text-xl font-semibold text-gray-900  mb-3">
           {title}
         </h3>
-        <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+        <p className="text-gray-600  mb-4 leading-relaxed">
           {description}
         </p>
         
@@ -47,7 +47,7 @@ const ServiceCard = ({
             {onShow && (
               <button
                 onClick={() => onShow(id)}
-                className="flex-1 px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                className="flex-1 px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 "
               >
                 View
               </button>
@@ -63,7 +63,7 @@ const ServiceCard = ({
             {onDelete && (
               <button
                 onClick={() => onDelete(id)}
-                className="flex-1 px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                className="flex-1 px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 "
               >
                 Delete
               </button>

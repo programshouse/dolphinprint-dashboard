@@ -3,12 +3,12 @@ import React, { useState } from "react";
 export default function FaqCard({ question, answer, category, updatedAt, onShow, onEdit, onDelete, id }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-4">
+    <div className="rounded-xl border border-gray-200  bg-white  shadow-sm p-4">
       <div className="flex items-start gap-3">
         <div className="mt-1 h-3 w-3 rounded-full bg-brand-500" />
         <div className="flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-base font-semibold text-gray-900 ">
               {question}
             </h3>
             <button
@@ -22,7 +22,7 @@ export default function FaqCard({ question, answer, category, updatedAt, onShow,
             <div className="mt-1 text-xs text-gray-500">{category}</div>
           )}
           <div
-            className={`mt-3 text-sm text-gray-700 dark:text-gray-300 transition-all ${
+            className={`mt-3 text-sm text-gray-700  transition-all ${
               open ? "line-clamp-none" : "line-clamp-3"
             }`}
             dangerouslySetInnerHTML={{ __html: answer }}
@@ -39,7 +39,7 @@ export default function FaqCard({ question, answer, category, updatedAt, onShow,
               {onShow && (
                 <button
                   onClick={() => onShow(id)}
-                  className="px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  className="px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 "
                 >
                   View
                 </button>
@@ -55,7 +55,7 @@ export default function FaqCard({ question, answer, category, updatedAt, onShow,
               {onDelete && (
                 <button
                   onClick={() => onDelete(id)}
-                  className="px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  className="px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 "
                 >
                   Delete
                 </button>

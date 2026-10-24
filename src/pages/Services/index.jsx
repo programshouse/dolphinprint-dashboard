@@ -17,7 +17,7 @@ export default function Services() {
 
   const isDetail = !!params.id;
   const isFormRoute = location.pathname.includes("/form");
-  const isForm = isFormRoute || showForm;
+  const isForm = isFormRoute;
 
   useEffect(() => {
     if (!isDetail) {

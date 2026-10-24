@@ -53,12 +53,12 @@ export default function ContactForm() {
   if (submitted) {
     return (
       <div className="max-w-2xl mx-auto p-6">
-        <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-8 text-center">
-          <div className="text-green-600 dark:text-green-400 text-6xl mb-4">✓</div>
-          <h2 className="text-2xl font-semibold text-green-800 dark:text-green-200 mb-2">
+        <div className="bg-green-50  border border-green-200  rounded-lg p-8 text-center">
+          <div className="text-green-600  text-6xl mb-4">✓</div>
+          <h2 className="text-2xl font-semibold text-green-800  mb-2">
             Message Sent Successfully!
           </h2>
-          <p className="text-green-700 dark:text-green-300 mb-6">
+          <p className="text-green-700  mb-6">
             Thank you for contacting us. We'll get back to you within 24 hours.
           </p>
           <button
@@ -82,7 +82,7 @@ export default function ContactForm() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700  mb-2">
               Your Name *
             </label>
             <input
@@ -90,14 +90,14 @@ export default function ContactForm() {
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent   "
               required
               placeholder="John Doe"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700  mb-2">
               Email Address *
             </label>
             <input
@@ -105,14 +105,14 @@ export default function ContactForm() {
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent   "
               required
               placeholder="john@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700  mb-2">
               Phone Number
             </label>
             <input
@@ -120,13 +120,13 @@ export default function ContactForm() {
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent   "
               placeholder="+1 (555) 123-4567"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700  mb-2">
               Subject *
             </label>
             <input
@@ -134,7 +134,7 @@ export default function ContactForm() {
               name="subject"
               value={formData.subject}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent   "
               required
               placeholder="How can we help you?"
             />
@@ -142,7 +142,7 @@ export default function ContactForm() {
         </div>
 
         <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700  mb-2">
             Message *
           </label>
           <textarea
@@ -150,37 +150,37 @@ export default function ContactForm() {
             value={formData.message}
             onChange={handleInputChange}
             rows={6}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent   "
             required
             placeholder="Tell us more about your inquiry..."
           />
         </div>
 
         {/* Contact Information */}
-        <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="mt-8 p-6 bg-gray-50  rounded-lg">
+          <h3 className="text-lg font-semibold text-gray-900  mb-4">
             Other Ways to Reach Us
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-start gap-3">
               <FaEnvelope className="text-brand-600 mt-1" />
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Email</p>
-                <p className="text-gray-600 dark:text-gray-300">info@dolphinprint.com</p>
+                <p className="font-medium text-gray-900 ">Email</p>
+                <p className="text-gray-600 ">info@dolphinprint.com</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <FaPhone className="text-brand-600 mt-1" />
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Phone</p>
-                <p className="text-gray-600 dark:text-gray-300">+1 (555) 123-4567</p>
+                <p className="font-medium text-gray-900 ">Phone</p>
+                <p className="text-gray-600 ">+1 (555) 123-4567</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <FaMapMarkerAlt className="text-brand-600 mt-1" />
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">Address</p>
-                <p className="text-gray-600 dark:text-gray-300">123 Business St, City, State 12345</p>
+                <p className="font-medium text-gray-900 ">Address</p>
+                <p className="text-gray-600 ">123 Business St, City, State 12345</p>
               </div>
             </div>
           </div>

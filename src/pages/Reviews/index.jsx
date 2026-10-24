@@ -17,7 +17,7 @@ export default function Reviews() {
 
   const isDetail = Boolean(id);
   const isFormRoute = location.pathname.includes("/form");
-  const isForm = isFormRoute || showForm;
+  const isForm = isFormRoute;
 
   useEffect(() => {
     if (!isDetail) {

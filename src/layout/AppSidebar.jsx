@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
+  MdHome,
   MdPerson,
   MdWork,
   MdBusiness,
@@ -14,6 +15,7 @@ import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
 
 const navItems = [
+  { name: "Home", icon: <MdHome />, path: "/" },
   {
     name: "Features",            // 👈 NEW
     icon: <MdMiscellaneousServices />,
@@ -35,7 +37,7 @@ const navItems = [
 ];
 
 const AppSidebar = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { isExpanded, isMobileOpen, isHovered, setIsHovered, toggleMobileSidebar } = useSidebar();
 
   // order nav items alphabetically by name
   function getSortedNavItems(items) {
@@ -50,7 +52,7 @@ const AppSidebar = () => {
   const [openSubmenu, setOpenSubmenu] = useState(null);
 
   const isActive = useCallback(
-    (path) => location.pathname === path,
+    (path) => path === "/" ? location.pathname === "/" : location.pathname === path || location.pathname.startsWith(path + "/"),
     [location.pathname]
   );
 
@@ -79,33 +81,30 @@ const AppSidebar = () => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 z-50 mt-16 flex h-screen flex-col border-r border-gray-200 bg-white px-5 text-gray-900 transition-all duration-300 ease-in-out lg:mt-0 dark:border-gray-800 dark:bg-gray-900 ${
+      className={`fixed top-0 left-0 z-[100000] mt-0 flex h-[100dvh] flex-col border-r border-gray-200 bg-white px-5 text-gray-900 transition-all duration-300 ease-in-out lg:mt-0   ${
         isExpanded || isMobileOpen
-          ? "w-[290px]"
+          ? "w-[min(310px,85vw)] lg:w-[290px]"
           : isHovered
-          ? "w-[290px]"
+          ? "w-[min(310px,85vw)] lg:w-[290px]"
           : "w-[90px]"
       } ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex py-8 lg:justify-center">
-        <Link to="/">
+      <div className="relative flex shrink-0 items-center justify-center py-7 lg:py-8">
+        <button type="button" aria-label="Close sidebar" onClick={toggleMobileSidebar}
+          className="absolute left-0 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-gray-700 lg:hidden">
+          <span className="text-2xl leading-none">←</span>
+        </button>
+        <Link to="/" onClick={() => { if (isMobileOpen) toggleMobileSidebar(); }}>
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <img
-                className="dark:hidden"
+                className
                 src="/images/logo/dolphin.svg"
                 alt="logo2"
                 width={90}
                 height={35}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images1/logo/logo2-dark.svg"
-                alt="logo2"
-                width={150}
-                height={40}
               />
             </>
           ) : (
@@ -119,7 +118,7 @@ const AppSidebar = () => {
         </Link>
       </div>
 
-      <nav className="no-scrollbar flex flex-col overflow-y-auto pb-6 duration-300 ease-linear">
+      <nav className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto pb-8 duration-300 ease-linear">
         <ul className="flex flex-col gap-4">
           {getSortedNavItems(navItems).map((nav, index) => (
             <li key={nav.name}>
@@ -158,6 +157,7 @@ const AppSidebar = () => {
                 nav.path && (
                   <Link
                     to={nav.path}
+                    onClick={() => { if (isMobileOpen) toggleMobileSidebar(); }}
                     className={`menu-item group ${
                       isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
                     }`}

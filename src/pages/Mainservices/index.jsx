@@ -13,7 +13,7 @@ export default function Services() {
   const [editingService, setEditingService] = useState(null);
   const { fetchfeatures } = useFeatureStore();
 
-  const isForm = location.pathname.includes("/form") || showForm;
+  const isForm = location.pathname.includes("/form");
   const isDetail = !!params.id;
 
   // Load features on component mount
@@ -26,6 +26,7 @@ export default function Services() {
   const handleEdit = (service) => {
     setEditingService(service);
     setShowForm(true);
+    navigate("/mainservices/form");
   };
 
   const handleShow = (feature) => {
@@ -35,6 +36,7 @@ export default function Services() {
   const handleAdd = () => {
     setEditingService(null);
     setShowForm(true);
+    navigate("/mainservices/form");
   };
 
   const handleFormSuccess = () => {
@@ -55,6 +57,7 @@ export default function Services() {
       <ServiceForm
         serviceId={editingService?.id}
         onSuccess={handleFormSuccess}
+        onCancel={() => { setShowForm(false); navigate("/mainservices"); }}
       />
     );
   }

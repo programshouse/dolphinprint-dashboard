@@ -6,7 +6,7 @@ import { useFeatureStore } from "../../stors/useFeatureStore";
 const MAX_TITLE = 140;
 const MAX_DESC = 2000;
 
-export default function ServiceForm({ serviceId, onSuccess }) {
+export default function ServiceForm({ serviceId, onSuccess, onCancel }) {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
@@ -128,13 +128,13 @@ export default function ServiceForm({ serviceId, onSuccess }) {
     }
   };
 
-  const cancel = () => onSuccess && onSuccess();
+  const cancel = () => (onCancel || onSuccess)?.();
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 text-center">
+      <div className="bg-white  rounded-lg border border-gray-200  p-6 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto"></div>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">
+        <p className="mt-2 text-gray-600 ">
           Loading feature…
         </p>
       </div>
@@ -159,7 +159,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
       submitDisabled={saving || Object.keys(vErr).length > 0}
     >
       {err && (
-        <div className="mb-3 text-sm px-3 py-2 rounded bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+        <div className="mb-3 text-sm px-3 py-2 rounded bg-red-50  text-red-700  border border-red-200 ">
           {err}
         </div>
       )}
@@ -167,13 +167,13 @@ export default function ServiceForm({ serviceId, onSuccess }) {
       {/* ✅ Old Image Preview */}
       {imagePreview && (
         <div className="mb-4">
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+          <p className="text-sm text-gray-600  mb-2">
             Current image:
           </p>
           <img
             src={imagePreview}
             alt="feature"
-            className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+            className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200 "
           />
         </div>
       )}
@@ -188,7 +188,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
           accept="image/*"
         />
         {serviceId && !(image instanceof File) && (
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-xs text-gray-500 ">
             Leave image empty to keep the current one.
           </p>
         )}
@@ -202,7 +202,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
           className={`px-4 py-2 font-semibold ${
             activeTab === "en"
               ? "border-b-2 border-brand-600 text-brand-600"
-              : "text-gray-600 dark:text-gray-300"
+              : "text-gray-600 "
           }`}
         >
           English
@@ -213,7 +213,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
           className={`px-4 py-2 font-semibold ${
             activeTab === "ar"
               ? "border-b-2 border-brand-600 text-brand-600"
-              : "text-gray-600 dark:text-gray-300"
+              : "text-gray-600 "
           }`}
         >
           العربية
@@ -224,7 +224,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
       {activeTab === "en" && (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 ">
               Title (EN) *
             </label>
             <input
@@ -232,7 +232,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
               onChange={(e) => setTitleEN(e.target.value)}
               maxLength={MAX_TITLE}
               placeholder="Feature title in English…"
-              className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500   "
               required
             />
             <div className="mt-1 flex justify-between text-xs text-gray-500">
@@ -244,7 +244,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 ">
               Description (EN) *
             </label>
             <textarea
@@ -253,7 +253,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
               rows={5}
               maxLength={MAX_DESC}
               placeholder="Describe the feature in English…"
-              className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500   "
               required
             />
             <div className="mt-1 flex justify-between text-xs text-gray-500">
@@ -270,7 +270,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
       {activeTab === "ar" && (
         <div className="space-y-4" dir="rtl">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 ">
               العنوان (AR) *
             </label>
             <input
@@ -278,7 +278,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
               onChange={(e) => setTitleAR(e.target.value)}
               maxLength={MAX_TITLE}
               placeholder="عنوان الميزة باللغة العربية…"
-              className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-right"
+              className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500    text-right"
               required
             />
             <div className="mt-1 flex justify-between text-xs text-gray-500">
@@ -293,7 +293,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 ">
               الوصف (AR) *
             </label>
             <textarea
@@ -302,7 +302,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
               rows={5}
               maxLength={MAX_DESC}
               placeholder="صف الميزة باللغة العربية…"
-              className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-right"
+              className="mt-1 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500    text-right"
               required
             />
             <div className="mt-1 flex justify-between text-xs text-gray-500">

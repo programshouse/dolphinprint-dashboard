@@ -5,7 +5,7 @@ const Button = ({
   startIcon,
   endIcon,
   onClick,
-  className = "",
+  className,
   disabled = false,
 }) => {
   // Size Classes

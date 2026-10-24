@@ -9,7 +9,7 @@ const AdminTable = ({
   onShow,
   onAdd,
   addText = "Add New",
-  className = "",
+  className,
   // ✅ if true: call onDelete with (item.id || item._id)
   // ✅ if false: call onDelete with the entire item
   deleteById = false,
@@ -43,11 +43,11 @@ const AdminTable = ({
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}
+      className={`bg-white  rounded-lg shadow-sm border border-gray-200  ${className}`}
     >
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-6 border-b border-gray-200 ">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold text-gray-900 ">
             {title}
           </h2>
 
@@ -65,31 +65,31 @@ const AdminTable = ({
 
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 dark:bg-gray-700">
+          <thead className="bg-gray-50 ">
             <tr>
               {columns.map((column, index) => (
                 <th
                   key={index}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500  uppercase tracking-wider"
                 >
                   {column.header}
                 </th>
               ))}
 
               {hasActions && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500  uppercase tracking-wider">
                   Actions
                 </th>
               )}
             </tr>
           </thead>
 
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="bg-white  divide-y divide-gray-200 ">
             {data.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length + (hasActions ? 1 : 0)}
-                  className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-300"
+                  className="px-6 py-8 text-center text-sm text-gray-500 "
                 >
                   No data found.
                 </td>
@@ -98,12 +98,12 @@ const AdminTable = ({
               data.map((item, index) => (
                 <tr
                   key={item?.id || item?._id || index}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="hover:bg-gray-50 "
                 >
                   {columns.map((column, colIndex) => (
                     <td
                       key={colIndex}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white"
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 "
                     >
                       {column.render ? column.render(item) : item?.[column.key]}
                     </td>
@@ -116,7 +116,7 @@ const AdminTable = ({
                           <button
                             type="button"
                             onClick={() => onShow?.(item)}
-                            className="px-3 py-2 rounded-md border border-brand-600 text-brand-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            className="px-3 py-2 rounded-md border border-brand-600 text-brand-600 hover:bg-blue-50 "
                           >
                             View
                           </button>
@@ -136,7 +136,7 @@ const AdminTable = ({
                           <button
                             type="button"
                             onClick={() => handleDeleteClick(item)}
-                            className="px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            className="px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 "
                           >
                             Delete
                           </button>

@@ -22,7 +22,7 @@ export const SidebarProvider = ({ children }) => {
     if (typeof window === "undefined") return;
 
     const handleResize = () => {
-      const mobile = window.innerWidth < 768;
+      const mobile = window.innerWidth < 1024;
       setIsMobile(mobile);
       if (!mobile) setIsMobileOpen(false);
     };
@@ -47,6 +47,7 @@ export const SidebarProvider = ({ children }) => {
       openSubmenu,
       toggleSidebar,
       toggleMobileSidebar,
+      closeMobileSidebar: () => setIsMobileOpen(false),
       setIsHovered,
       setActiveItem,
       toggleSubmenu,

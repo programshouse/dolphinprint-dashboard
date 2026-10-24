@@ -12,10 +12,10 @@ import Card from "./components/ui/card.jsx";
 import AppLayout from "./layout/AppLayout";
 import Home from "./pages/Dashboard/Home";
 import Services from "./pages/Services";
-import Reviews from "./pages/reviews";
+import Reviews from "./pages/Reviews";
 import Settings from "./pages/Settings/SettingsList.jsx";
 import SettingsForm from "./pages/Settings/SettingsForm.jsx";
-import MainServices from "./pages/mainservices";
+import MainServices from "./pages/Mainservices";
 import FAQ from "./pages/FAQ/index.jsx";
 
 // GuestOnlyRoute: only guests (not logged-in)

@@ -10,7 +10,7 @@ const blankFaq = () => ({
   answer_ar: "",
 });
 
-export default function FaqForm({ faqId, onSuccess }) {
+export default function FaqForm({ faqId, onSuccess, onCancel }) {
   const isEditing = !!faqId;
 
   const {
@@ -172,13 +172,13 @@ export default function FaqForm({ faqId, onSuccess }) {
     }
   };
 
-  const cancel = () => onSuccess && onSuccess();
+  const cancel = () => (onCancel || onSuccess)?.();
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+      <div className="bg-white  rounded-lg shadow-sm border border-gray-200  p-6 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
-        <p className="mt-2 text-gray-600 dark:text-gray-300">Loading FAQ…</p>
+        <p className="mt-2 text-gray-600 ">Loading FAQ…</p>
       </div>
     );
   }
@@ -203,21 +203,21 @@ export default function FaqForm({ faqId, onSuccess }) {
           return (
             <div
               key={i}
-              className={`rounded-xl border p-4 bg-white dark:bg-gray-900 ${
+              className={`rounded-xl border p-4 bg-white  ${
                 invalid
-                  ? "border-red-300 dark:border-red-700"
-                  : "border-gray-200 dark:border-gray-700"
+                  ? "border-red-300 "
+                  : "border-gray-200 "
               }`}
             >
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                <h3 className="text-sm font-semibold text-gray-800 ">
                   FAQ #{i + 1}
                 </h3>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => move(i, -1)}
-                    className="px-2 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="px-2 py-1 text-xs rounded-md border border-gray-300  hover:bg-gray-50 "
                     disabled={i === 0}
                   >
                     ↑
@@ -225,7 +225,7 @@ export default function FaqForm({ faqId, onSuccess }) {
                   <button
                     type="button"
                     onClick={() => move(i, +1)}
-                    className="px-2 py-1 text-xs rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="px-2 py-1 text-xs rounded-md border border-gray-300  hover:bg-gray-50 "
                     disabled={i === faqsForm.length - 1}
                   >
                     ↓
@@ -245,7 +245,7 @@ export default function FaqForm({ faqId, onSuccess }) {
               {/* Questions */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700  mb-1">
                     Question (EN) *
                   </label>
                   <input
@@ -254,12 +254,12 @@ export default function FaqForm({ faqId, onSuccess }) {
                       updateField(i, "question_en", e.target.value)
                     }
                     placeholder="e.g., How do I book a session?"
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500   "
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700  mb-1">
                     السؤال (AR) *
                   </label>
                   <input
@@ -269,7 +269,7 @@ export default function FaqForm({ faqId, onSuccess }) {
                     }
                     placeholder="مثال: كيف أحجز جلسة؟"
                     dir="rtl"
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500   "
                     required
                   />
                 </div>
@@ -278,7 +278,7 @@ export default function FaqForm({ faqId, onSuccess }) {
               {/* Answers */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700  mb-1">
                     Answer (EN) *
                   </label>
                   <textarea
@@ -288,12 +288,12 @@ export default function FaqForm({ faqId, onSuccess }) {
                     }
                     rows={5}
                     placeholder="Provide a clear and helpful answer in English…"
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500   "
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700  mb-1">
                     الإجابة (AR) *
                   </label>
                   <textarea
@@ -304,7 +304,7 @@ export default function FaqForm({ faqId, onSuccess }) {
                     rows={5}
                     placeholder="أدخل إجابة واضحة ومفيدة بالعربية…"
                     dir="rtl"
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500   "
                     required
                   />
                 </div>

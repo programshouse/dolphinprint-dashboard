@@ -1,5 +1,6 @@
+import React from "react";
 import { SidebarProvider, useSidebar } from "../context/SidebarContext";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
@@ -12,7 +13,9 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const LayoutContent = () => {
-  const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+  const { isExpanded, isHovered, isMobileOpen, closeMobileSidebar } = useSidebar();
+  const location = useLocation();
+React.useEffect(() => { closeMobileSidebar(); }, [location.pathname, location.search]);
 
   return (
     <div className="min-h-screen xl:flex">
@@ -24,7 +27,7 @@ const LayoutContent = () => {
         closeOnClick
         pauseOnHover
         draggable
-        theme="colored"
+        theme="light"
         toastStyle={{ zIndex: 999999 }}
       />
 

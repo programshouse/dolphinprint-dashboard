@@ -20,22 +20,22 @@ export default function FaqList({ onEdit, onAdd, onShow }) {
   };
 
   const Card = ({ item }) => (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-4 flex flex-col">
+    <div className="rounded-xl border border-gray-200  bg-white  shadow-sm p-4 flex flex-col">
       <div className="flex items-start gap-3">
         <div className="mt-1 h-3 w-3 rounded-full bg-brand-600" />
         <div className="flex-1">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-base font-semibold text-gray-900 ">
             {item.question_en}
           </h3>
-          <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
+          <p className="mt-1 text-sm text-gray-700 ">
             {item.answer_en}
           </p>
 
-          <div className="mt-4 rounded-lg border border-gray-200 dark:border-gray-800 p-3 bg-gray-50 dark:bg-gray-900/40">
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white" dir="rtl">
+          <div className="mt-4 rounded-lg border border-gray-200  p-3 bg-gray-50 ">
+            <h4 className="text-sm font-semibold text-gray-900 " dir="rtl">
               {item.question_ar}
             </h4>
-            <p className="mt-1 text-sm text-gray-700 dark:text-gray-300" dir="rtl">
+            <p className="mt-1 text-sm text-gray-700 " dir="rtl">
               {item.answer_ar}
             </p>
           </div>
@@ -43,7 +43,7 @@ export default function FaqList({ onEdit, onAdd, onShow }) {
           <div className="mt-4 flex gap-2">
             <button
               onClick={() => onShow && onShow(item)}
-              className="px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 "
             >
               View
             </button>
@@ -55,7 +55,7 @@ export default function FaqList({ onEdit, onAdd, onShow }) {
             </button>
             <button
               onClick={() => handleDelete(item)}
-              className="px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+              className="px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 "
             >
               Delete
             </button>
@@ -82,7 +82,7 @@ export default function FaqList({ onEdit, onAdd, onShow }) {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="h-52 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40 animate-pulse"
+                className="h-52 rounded-xl border border-gray-200  bg-gray-50  animate-pulse"
               />
             ))}
           </div>
@@ -105,7 +105,7 @@ export default function FaqList({ onEdit, onAdd, onShow }) {
         </div>
 
         {faqs.length === 0 ? (
-          <div className="text-gray-600 dark:text-gray-300">
+          <div className="text-gray-600 ">
             No FAQs yet. Click <strong>+ Add FAQ</strong> to create one.
           </div>
         ) : (
