@@ -9,6 +9,7 @@ import {
   MdReviews,
   MdDescription,
   MdMiscellaneousServices, // 👈 NEW
+  MdLibraryBooks,
 } from "react-icons/md";
 import { ChevronDownIcon } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -32,6 +33,11 @@ const navItems = [
     name: "Reviews",
     icon: <MdReviews />,
     path: "/reviews",
+  },
+  {
+    name: "Blogs",
+    icon: <MdLibraryBooks />,
+    path: "/blogs",
   },
   { name: "Contact", icon: <MdDescription />, path: "/form" },
 ];
@@ -222,4 +228,3 @@ const AppSidebar = () => {
 };
 
 export default AppSidebar;
-

@@ -61,13 +61,37 @@ export default function BlogCards({ apiUrl, headers = {}, onEdit }) {
     return h;
   };
 
-  const stripHtml = (html = "") =>
-    (html + "")
-      .replace(/<style[^>]*>.*?<\/style>/gis, "")
-      .replace(/<script[^>]*>.*?<\/script>/gis, "")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+  const stripHtml = (html = "") => {
+    if (!html) return "";
+    try {
+      const doc = new DOMParser().parseFromString(String(html), "text/html");
+      let text = doc.body.textContent || "";
+      return text
+        .replace(/&nbsp;/gi, " ")
+        .replace(/&amp;/gi, "&")
+        .replace(/&lt;/gi, "<")
+        .replace(/&gt;/gi, ">")
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'")
+        .replace(/\u00a0/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    } catch {
+      return String(html)
+        .replace(/<style[^>]*>.*?<\/style>/gis, "")
+        .replace(/<script[^>]*>.*?<\/script>/gis, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;/gi, " ")
+        .replace(/&amp;/gi, "&")
+        .replace(/&lt;/gi, "<")
+        .replace(/&gt;/gi, ">")
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'")
+        .replace(/\u00a0/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+  };
 
   const formatDate = (value) => {
     if (!value) return "";
@@ -84,21 +108,29 @@ export default function BlogCards({ apiUrl, headers = {}, onEdit }) {
   // Normalize ONE blog object from your API into the shape the UI needs
   const normalize = (raw) => {
     const id = raw.id ?? raw._id ?? raw.uuid ?? raw.slug ?? Math.random().toString(36);
-    const title = raw.title ?? raw.name ?? raw.slug ?? "Untitled";
+    const title = raw.title_en || raw.title || raw.title_ar || raw.name || raw.slug || "Untitled";
 
-    // your API puts HTML in "content"
-    const html = raw.content ?? raw.content_html ?? raw.html ?? raw.body ?? "";
+    // your API puts HTML in "content", "content_en", or "content_ar"
+    const html = raw.content_en || raw.content || raw.content_ar || raw.content_html || raw.html || raw.body || "";
     const text = stripHtml(html);
 
     return {
       id,
       title,
+      title_en: raw.title_en,
+      title_ar: raw.title_ar,
       html,
+      content_en: raw.content_en,
+      content_ar: raw.content_ar,
       text,
       description: raw.description ?? (text ? text.slice(0, 160) : "No content…"),
       image: raw.image || null,
-      category: raw.category ?? raw.category_name ?? null,
+      category: raw.category_en || raw.category || raw.category_ar || raw.category_name || null,
+      category_en: raw.category_en,
+      category_ar: raw.category_ar,
       adminEmail: raw.admin?.email ?? null,
+      userName: raw.user_name || null,
+      userImage: raw.user_image || null,
       created: raw.created_at ?? raw.createdAt ?? raw.date ?? "",
       stats: {
         comments: Number(raw.comments_count ?? 0),

@@ -17,6 +17,7 @@ import Settings from "./pages/Settings/SettingsList.jsx";
 import SettingsForm from "./pages/Settings/SettingsForm.jsx";
 import MainServices from "./pages/Mainservices";
 import FAQ from "./pages/FAQ/index.jsx";
+import Blogs from "./pages/Blogs";
 
 // GuestOnlyRoute: only guests (not logged-in)
 const GuestOnlyRoute = ({ children }) => {
@@ -50,6 +51,11 @@ const router = createBrowserRouter([
       { path: "/faq", element: <FAQ /> },
       { path: "/faq/form", element: <FAQ /> },
       { path: "/faq/:id", element: <FAQ /> },
+
+      // Blogs
+      { path: "/blogs", element: <Blogs /> },
+      { path: "/blogs/form", element: <Blogs /> },
+      { path: "/blogs/:id", element: <Blogs /> },
 
       // Contact form
       { path: "/form", element: <SettingsForm /> },
