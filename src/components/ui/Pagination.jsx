@@ -87,17 +87,7 @@ export default function Pagination({
     >
       {/* Left side: Information (and optional Rows per page if enabled) */}
       <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
-        {showInfo && totalItems > 0 && (
-          <div>
-            Showing{" "}
-            <span className="font-semibold text-gray-900">{startItem}</span> to{" "}
-            <span className="font-semibold text-gray-900">{endItem}</span> of{" "}
-            <span className="font-semibold text-gray-900">{totalItems}</span> results
-          </div>
-        )}
-        {showInfo && totalItems === 0 && (
-          <div>No items to display</div>
-        )}
+
 
         {showRowsPerPage && onItemsPerPageChange && (
           <RowsPerPageSelect
@@ -156,11 +146,10 @@ export default function Pagination({
                 aria-label={`Page ${p}`}
                 aria-current={isActive ? "page" : undefined}
                 onClick={() => handlePageClick(p)}
-                className={`flex h-8 min-w-[32px] sm:h-9 sm:min-w-[36px] items-center justify-center rounded-lg px-2 text-xs sm:text-sm font-medium transition ${
-                  isActive
+                className={`flex h-8 min-w-[32px] sm:h-9 sm:min-w-[36px] items-center justify-center rounded-lg px-2 text-xs sm:text-sm font-medium transition ${isActive
                     ? "bg-brand-600 text-white shadow-sm border border-brand-600 hover:bg-brand-700"
                     : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 {p}
               </button>
