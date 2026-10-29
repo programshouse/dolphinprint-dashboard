@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -5,8 +6,8 @@ import {
   TableHeader,
   TableRow,
 } from "../../ui/table";
-
 import Badge from "../../ui/badge/Badge";
+import Pagination, { RowsPerPageSelect } from "../../ui/Pagination";
 
 
 
@@ -97,8 +98,35 @@ const tableData = [
 ];
 
 export default function BasicTableOne() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(3);
+
+  const totalItems = tableData.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const displayedRows = tableData.slice(startIndex, endIndex);
+
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white  ">
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+        <h3 className="font-semibold text-gray-800 text-theme-sm">Projects</h3>
+        <RowsPerPageSelect
+          value={pageSize}
+          onChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          options={[3, 5, 10]}
+        />
+      </div>
       <div className="max-w-full overflow-x-auto">
         <Table>
           {/* Table Header */}
@@ -139,7 +167,7 @@ export default function BasicTableOne() {
 
           {/* Table Body */}
           <TableBody className="divide-y divide-gray-100 ">
-            {tableData.map((order) => (
+            {displayedRows.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="px-5 py-4 sm:px-6 text-start">
                   <div className="flex items-center gap-3">
@@ -203,6 +231,17 @@ export default function BasicTableOne() {
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="border-t border-gray-100 px-5 py-3">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          itemsPerPage={pageSize}
+          onPageChange={setCurrentPage}
+          showRowsPerPage={false}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
+import Pagination, { RowsPerPageSelect } from "./Pagination";
 
 /**
  * BlogCards
@@ -14,6 +15,21 @@ export default function BlogCards({ apiUrl, headers = {}, onEdit }) {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [preview, setPreview] = useState(null); // {title, html}
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  const totalItems = items.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const displayedItems = items.slice(startIndex, endIndex);
 
   // --- helpers ---
   const ensureBearer = (maybeToken) => {
@@ -199,8 +215,19 @@ export default function BlogCards({ apiUrl, headers = {}, onEdit }) {
 
   return (
     <div style={{ padding: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <h3 style={{ margin: 0 }}>Blogs</h3>
+      {/* Top Bar: RowsPerPageSelect ON TOP */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <h3 style={{ margin: 0 }}>Blogs</h3>
+          <RowsPerPageSelect
+            value={pageSize}
+            onChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            options={[10, 20, 30, 50]}
+          />
+        </div>
         <button onClick={load} style={btn}>Refresh</button>
       </div>
 
@@ -208,7 +235,7 @@ export default function BlogCards({ apiUrl, headers = {}, onEdit }) {
         <div style={empty}>No blogs yet.</div>
       ) : (
         <div style={grid}>
-          {items.map((it) => (
+          {displayedItems.map((it) => (
             <article key={it.id} style={card}>
               {it.image ? (
                 <div style={{ marginBottom: 10 }}>
@@ -258,6 +285,20 @@ export default function BlogCards({ apiUrl, headers = {}, onEdit }) {
               </div>
             </article>
           ))}
+        </div>
+      )}
+
+      {/* Bottom Bar: Page Navigation only (Rows per page is on top) */}
+      {totalItems > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={pageSize}
+            onPageChange={setCurrentPage}
+            showRowsPerPage={false}
+          />
         </div>
       )}
 

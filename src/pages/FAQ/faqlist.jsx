@@ -1,14 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
+import Pagination, { RowsPerPageSelect } from "../../components/ui/Pagination";
 import { useFaqStore } from "../../stors/useFaqStore";
 
 export default function FaqList({ onEdit, onAdd, onShow }) {
   const { faqs, loading, getFaqs, deleteFaq } = useFaqStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     getFaqs();
   }, [getFaqs]);
+
+  const totalItems = faqs?.length || 0;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const displayedFaqs = (faqs || []).slice(startIndex, endIndex);
 
   const handleDelete = async (faq) => {
     if (!window.confirm(`Delete this FAQ?\n\n${faq.question_en || ""}`)) return;
@@ -20,47 +36,50 @@ export default function FaqList({ onEdit, onAdd, onShow }) {
   };
 
   const Card = ({ item }) => (
-    <div className="rounded-xl border border-gray-200  bg-white  shadow-sm p-4 flex flex-col">
+    <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-4 flex flex-col justify-between">
       <div className="flex items-start gap-3">
-        <div className="mt-1 h-3 w-3 rounded-full bg-brand-600" />
+        <div className="mt-1 h-3 w-3 shrink-0 rounded-full bg-brand-600" />
         <div className="flex-1">
-          <h3 className="text-base font-semibold text-gray-900 ">
+          <h3 className="text-base font-semibold text-gray-900">
             {item.question_en}
           </h3>
-          <p className="mt-1 text-sm text-gray-700 ">
+          <p className="mt-1 text-sm text-gray-700">
             {item.answer_en}
           </p>
 
-          <div className="mt-4 rounded-lg border border-gray-200  p-3 bg-gray-50 ">
-            <h4 className="text-sm font-semibold text-gray-900 " dir="rtl">
+          <div className="mt-4 rounded-lg border border-gray-200 p-3 bg-gray-50">
+            <h4 className="text-sm font-semibold text-gray-900" dir="rtl">
               {item.question_ar}
             </h4>
-            <p className="mt-1 text-sm text-gray-700 " dir="rtl">
+            <p className="mt-1 text-sm text-gray-700" dir="rtl">
               {item.answer_ar}
             </p>
           </div>
-
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={() => onShow && onShow(item)}
-              className="px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 "
-            >
-              View
-            </button>
-            <button
-              onClick={() => onEdit(item)}
-              className="px-3 py-2 rounded-md bg-brand-600 text-white hover:bg-brand-700"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => handleDelete(item)}
-              className="px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 "
-            >
-              Delete
-            </button>
-          </div>
         </div>
+      </div>
+
+      <div className="mt-4 flex gap-2 pt-2 border-t border-gray-100">
+        <button
+          type="button"
+          onClick={() => onShow && onShow(item)}
+          className="px-3 py-2 rounded-md border border-blue-600 text-blue-600 hover:bg-blue-50 transition-colors"
+        >
+          View
+        </button>
+        <button
+          type="button"
+          onClick={() => onEdit(item)}
+          className="px-3 py-2 rounded-md bg-brand-600 text-white hover:bg-brand-700 transition-colors"
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          onClick={() => handleDelete(item)}
+          className="px-3 py-2 rounded-md border border-red-600 text-red-600 hover:bg-red-50 transition-colors"
+        >
+          Delete
+        </button>
       </div>
     </div>
   );
@@ -82,7 +101,7 @@ export default function FaqList({ onEdit, onAdd, onShow }) {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="h-52 rounded-xl border border-gray-200  bg-gray-50  animate-pulse"
+                className="h-52 rounded-xl border border-gray-200 bg-gray-50 animate-pulse"
               />
             ))}
           </div>
@@ -95,25 +114,50 @@ export default function FaqList({ onEdit, onAdd, onShow }) {
     <PageLayout title="FAQs | Dolphin Print">
       <PageHeader title="FAQs" description="Manage your frequently asked questions" />
       <div className="col-span-12">
-        <div className="flex justify-end mb-4">
+        {/* Top Bar: Rows per page selector ON TOP and + Add FAQ button */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <RowsPerPageSelect
+            value={pageSize}
+            onChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            options={[10, 20, 50, 100]}
+          />
+
           <button
+            type="button"
             onClick={onAdd}
-            className="px-4 py-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700"
+            className="px-4 py-2 rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition-colors self-end sm:self-auto"
           >
             + Add FAQ
           </button>
         </div>
 
         {faqs.length === 0 ? (
-          <div className="text-gray-600 ">
+          <div className="text-gray-600 bg-white rounded-xl border border-gray-200 p-8 text-center">
             No FAQs yet. Click <strong>+ Add FAQ</strong> to create one.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {faqs.map((f) => (
-              <Card key={f.id || f._id} item={f} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {displayedFaqs.map((f) => (
+                <Card key={f.id || f._id} item={f} />
+              ))}
+            </div>
+
+            {/* Bottom Bar: Page Navigation only (Rows per page is on top) */}
+            <div className="mt-6 bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={pageSize}
+                onPageChange={setCurrentPage}
+                showRowsPerPage={false}
+              />
+            </div>
+          </>
         )}
       </div>
     </PageLayout>

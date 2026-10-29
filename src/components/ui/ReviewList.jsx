@@ -1,6 +1,7 @@
 // src/pages/reviews/reviews-list.jsx
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Pagination, { RowsPerPageSelect } from "./Pagination";
 import { useDataStore } from "../../stors/useDataStore.js";
 
 const Star = ({ filled }) => (
@@ -10,7 +11,7 @@ const Star = ({ filled }) => (
 );
 const Stars = ({ rating = 0 }) => (
   <div className="flex items-center gap-0.5">
-    {[1,2,3,4,5].map((n)=>(<Star key={n} filled={n<=rating}/>))}
+    {[1, 2, 3, 4, 5].map((n) => (<Star key={n} filled={n <= rating} />))}
   </div>
 );
 
@@ -38,7 +39,7 @@ function ReviewRow({ r, onDelete }) {
             </p>
           )}
         </div>
-        <Stars rating={r.rate ?? r.rating ?? 0}/>
+        <Stars rating={r.rate ?? r.rating ?? 0} />
       </div>
       <p className="mt-2 text-gray-700">{r.description}</p>
 
@@ -54,11 +55,26 @@ function ReviewRow({ r, onDelete }) {
 }
 
 export default function ReviewsListPage() {
-  const { reviews, reviewsMeta, loading, message, getAllReviews, deleteReview } = useDataStore();
+  const { reviews, loading, message, getAllReviews, deleteReview } = useDataStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     getAllReviews?.();
   }, [getAllReviews]);
+
+  const totalItems = reviews?.length || 0;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const displayedReviews = (reviews || []).slice(startIndex, endIndex);
 
   return (
     <div className="min-h-screen bg-brand-25">
@@ -73,6 +89,18 @@ export default function ReviewsListPage() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 pb-16">
+        {/* Top Bar: RowsPerPageSelect ON TOP */}
+        <div className="flex justify-between items-center mb-4">
+          <RowsPerPageSelect
+            value={pageSize}
+            onChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            options={[10, 20, 30, 50]}
+          />
+        </div>
+
         {loading && reviews.length === 0 && (
           <div className="mt-6 animate-pulse space-y-3">
             <div className="h-6 w-40 rounded bg-gray-200" />
@@ -83,15 +111,23 @@ export default function ReviewsListPage() {
         {message && <p className="mb-4 text-brand-700">{message}</p>}
 
         <div className="grid gap-4 md:grid-cols-2">
-          {reviews.map((r) => (
-            <ReviewRow key={r.id ?? r._id ?? JSON.stringify(r)} r={r} onDelete={deleteReview}/>
+          {displayedReviews.map((r) => (
+            <ReviewRow key={r.id ?? r._id ?? JSON.stringify(r)} r={r} onDelete={deleteReview} />
           ))}
         </div>
 
-        {reviewsMeta?.last_page > 1 && (
-          <p className="mt-6 text-center text-sm text-gray-500">
-            Page {reviewsMeta.current_page} of {reviewsMeta.last_page}
-          </p>
+        {/* Bottom Bar: Page Navigation only (Rows per page is on top) */}
+        {totalItems > 0 && (
+          <div className="mt-6 bg-white rounded-xl border border-brand-200 p-4 shadow-sm">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={pageSize}
+              onPageChange={setCurrentPage}
+              showRowsPerPage={false}
+            />
+          </div>
         )}
       </main>
     </div>
