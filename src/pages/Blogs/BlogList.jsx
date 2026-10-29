@@ -30,6 +30,13 @@ export default function BlogList({ onEdit, onAdd, onShow }) {
     }
   };
 
+  const hasArabic = (text = "") => {
+    if (!text) return false;
+    return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
+      String(text)
+    );
+  };
+
   const stripHtml = (html = "") => {
     if (!html) return "";
     try {
@@ -86,11 +93,14 @@ export default function BlogList({ onEdit, onAdd, onShow }) {
       render: (b) => {
         const titleEn = b.title_en || b.title;
         const titleAr = b.title_ar;
+        const isArRtl = hasArabic(titleAr);
+
         return (
-          <div className="max-w-xs space-y-1">
+          <div className="max-w-xs space-y-1 text-left" dir="ltr">
             {titleEn && (
               <div
-                className="font-medium text-gray-900 truncate"
+                className="font-medium text-gray-900 truncate text-left"
+                dir="ltr"
                 title={`EN: ${titleEn}`}
               >
                 {titleEn}
@@ -98,16 +108,17 @@ export default function BlogList({ onEdit, onAdd, onShow }) {
             )}
             {titleAr && (
               <div
-                className={`text-xs truncate ${titleEn ? "text-gray-500 font-normal" : "font-medium text-gray-900"
-                  }`}
-                dir="rtl"
+                className={`text-xs truncate ${
+                  titleEn ? "text-gray-500 font-normal" : "font-medium text-gray-900"
+                } ${isArRtl ? "text-right" : "text-left"}`}
+                dir={isArRtl ? "rtl" : "ltr"}
                 title={`AR: ${titleAr}`}
               >
                 {titleAr}
               </div>
             )}
             {!titleEn && !titleAr && (
-              <span className="text-gray-400 italic">Untitled</span>
+              <span className="text-gray-400 italic text-left">Untitled</span>
             )}
           </div>
         );
@@ -122,17 +133,23 @@ export default function BlogList({ onEdit, onAdd, onShow }) {
         if (!catEn && !catAr) {
           return <span className="text-gray-400 text-xs">—</span>;
         }
+        const isCatArRtl = hasArabic(catAr);
         return (
-          <div className="flex flex-col gap-1 items-start">
+          <div className="flex flex-col gap-1 items-start text-left">
             {catEn && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand-50 text-brand-700 border border-brand-200">
+              <span
+                dir="ltr"
+                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand-50 text-brand-700 border border-brand-200 text-left"
+              >
                 {catEn}
               </span>
             )}
             {catAr && (
               <span
-                dir="rtl"
-                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200"
+                dir={isCatArRtl ? "rtl" : "ltr"}
+                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 ${
+                  isCatArRtl ? "text-right" : "text-left"
+                }`}
               >
                 {catAr}
               </span>
@@ -146,7 +163,7 @@ export default function BlogList({ onEdit, onAdd, onShow }) {
       header: "Author",
       render: (b) => {
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-left" dir="ltr">
             {b.user_image ? (
               <img
                 src={typeof b.user_image === "string" ? b.user_image : URL.createObjectURL(b.user_image)}
@@ -158,7 +175,7 @@ export default function BlogList({ onEdit, onAdd, onShow }) {
                 {(b.user_name || "A")[0].toUpperCase()}
               </div>
             )}
-            <span className="text-sm text-gray-700 font-medium max-w-[120px] truncate" title={b.user_name || "Anonymous"}>
+            <span className="text-sm text-gray-700 font-medium max-w-[120px] truncate text-left" title={b.user_name || "Anonymous"}>
               {b.user_name || "Anonymous"}
             </span>
           </div>
@@ -172,10 +189,12 @@ export default function BlogList({ onEdit, onAdd, onShow }) {
         const textEn = stripHtml(b.content_en || b.content || "");
         const textAr = stripHtml(b.content_ar || "");
         const displayText = textEn || textAr || "—";
-        const isRtl = !textEn && !!textAr;
+        const isRtl = hasArabic(displayText);
         return (
           <div
-            className="max-w-xs text-sm text-gray-500 truncate"
+            className={`max-w-xs text-sm text-gray-500 truncate ${
+              isRtl ? "text-right" : "text-left"
+            }`}
             dir={isRtl ? "rtl" : "ltr"}
             title={displayText}
           >
@@ -190,7 +209,7 @@ export default function BlogList({ onEdit, onAdd, onShow }) {
       render: (b) => {
         const dateVal = b.created_at || b.updated_at;
         const formatted = dateVal ? new Date(dateVal).toLocaleDateString() : "—";
-        return <span className="text-xs text-gray-500 whitespace-nowrap">{formatted}</span>;
+        return <span className="text-xs text-gray-500 whitespace-nowrap text-left" dir="ltr">{formatted}</span>;
       },
     },
   ];

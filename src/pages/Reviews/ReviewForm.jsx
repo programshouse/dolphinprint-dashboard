@@ -13,12 +13,13 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
 
   // Fields
   const [userName, setUserName] = useState("");
+  const [userJob, setUserJob] = useState("");
   const [descEn, setDescEn] = useState("");
   const [descAr, setDescAr] = useState("");
   const [rate, setRate] = useState(3);
   const [isActive, setIsActive] = useState("1");
 
-  // ✅ Keep existing image (string URL) separate from new file
+  // Keep existing image (string URL) separate from new file
   const [userImage, setUserImage] = useState(null); // string (existing) OR null
   const [newImageFile, setNewImageFile] = useState(null); // File OR null
 
@@ -39,26 +40,24 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
     if (!review) return;
 
     setUserName(review?.user_name || review?.name_en || review?.name || "");
+    setUserJob(review?.user_job || review?.job || "");
     setDescEn(review?.review_en || review?.description_en || review?.description || "");
     setDescAr(review?.review_ar || review?.description_ar || "");
     setRate(Number(review?.rate || 3));
     setIsActive(review?.is_active ?? "1");
 
-    // ✅ existing image url/string for preview
+    // existing image url/string for preview
     setUserImage(review?.user_image || review?.image || null);
 
-    // ✅ reset new file each time we load a review
+    // reset new file each time we load a review
     setNewImageFile(null);
   }, [review]);
 
-  // ✅ Keep your FileUpload as-is, just store the selected File separately
   const onFile = (e) => {
     const f = e.target.files?.[0] || null;
 
-    // Optional local validation (doesn't change FileUpload)
     if (f) {
       const okTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-      // some browsers use image/jpeg for jpg, "image/jpg" is uncommon but kept
       if (!okTypes.includes(f.type)) {
         alert("Only jpg, jpeg, png, webp allowed.");
         e.target.value = "";
@@ -88,12 +87,12 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
 
       const fd = new FormData();
       fd.append("user_name", userName.trim());
+      fd.append("user_job", (userJob || "").trim());
       fd.append("review_en", descEn.trim());
       fd.append("review_ar", descAr.trim());
       fd.append("rate", String(rate));
       fd.append("is_active", String(isActive));
 
-      // ✅ IMPORTANT FIX:
       // Only send user_image when user selected a NEW file
       if (newImageFile instanceof File) {
         fd.append("user_image", newImageFile);
@@ -103,6 +102,7 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
       console.log("Submitting review form:", {
         reviewId,
         userName,
+        userJob,
         descEn,
         descAr,
         rate,
@@ -115,9 +115,6 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
         await updateReview(reviewId, fd);
         onSuccess?.("update");
       } else {
-        // If API requires image on create, ensure it is provided:
-        // if (!newImageFile) { alert("Please upload an image"); return; }
-
         await createReview(fd);
         onSuccess?.("create");
       }
@@ -135,9 +132,9 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
 
   if (loading) {
     return (
-      <div className="bg-white  rounded-lg border border-gray-200  p-6 text-center">
+      <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto"></div>
-        <p className="mt-2 text-gray-600 ">Loading review…</p>
+        <p className="mt-2 text-gray-600">Loading review…</p>
       </div>
     );
   }
@@ -159,9 +156,9 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
       submitText={saving ? "Saving..." : reviewId ? "Update Review" : "Create Review"}
       submitDisabled={saving}
     >
-      {/* User Name */}
+      {/* Reviewer Name */}
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700  mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Reviewer Name *
         </label>
         <input
@@ -169,15 +166,30 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
           onChange={(e) => setUserName(e.target.value)}
           maxLength={120}
           placeholder="Reviewer name…"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent   "
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
           required
         />
         <p className="text-xs text-gray-500 mt-1">{userName.length}/120</p>
       </div>
 
+      {/* User Job */}
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          User Job
+        </label>
+        <input
+          value={userJob}
+          onChange={(e) => setUserJob(e.target.value)}
+          maxLength={120}
+          placeholder="e.g. Software Engineer, Marketing Manager, Designer…"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+        />
+        <p className="text-xs text-gray-500 mt-1">{userJob.length}/120</p>
+      </div>
+
       {/* Rating */}
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700  mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Rating *
         </label>
         <div className="flex items-center gap-2">
@@ -211,13 +223,13 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
 
       {/* Active Status */}
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700  mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Status *
         </label>
         <select
           value={isActive}
           onChange={(e) => setIsActive(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent   "
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
           required
         >
           <option value="1">Active</option>
@@ -227,7 +239,6 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
 
       {/* Image */}
       <div className="mt-4">
-        {/* ✅ Preview old or new image without changing FileUpload */}
         {previewSrc && (
           <div className="mb-3">
             <p className="text-sm text-gray-500 mb-2">
@@ -236,7 +247,7 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
             <img
               src={previewSrc}
               alt="Preview"
-              className="w-24 h-24 rounded-lg object-cover border border-gray-200 "
+              className="w-24 h-24 rounded-lg object-cover border border-gray-200"
             />
           </div>
         )}
@@ -257,7 +268,7 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
       {/* Descriptions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700  mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Review (EN) *
           </label>
           <textarea
@@ -266,14 +277,14 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
             rows={5}
             maxLength={1000}
             placeholder="What did they say? (English)…"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent   "
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             required
           />
           <p className="text-xs text-gray-500 mt-1">{descEn.length}/1000</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700  mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             التقييم (AR) *
           </label>
           <textarea
@@ -283,7 +294,7 @@ export default function ReviewForm({ reviewId, onSuccess, onCancel }) {
             maxLength={1000}
             placeholder="ماذا قالوا؟ (بالعربية)…"
             dir="rtl"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent   "
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             required
           />
           <p className="text-xs text-gray-500 mt-1">{descAr.length}/1000</p>

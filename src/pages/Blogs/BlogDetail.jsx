@@ -18,6 +18,13 @@ export default function BlogDetail({ blog, onClose }) {
 
   const currentBlog = blog || selectedBlog;
 
+  const hasArabic = (text = "") => {
+    if (!text) return false;
+    return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(
+      String(text)
+    );
+  };
+
   if (loading && !currentBlog) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -44,6 +51,10 @@ export default function BlogDetail({ blog, onClose }) {
       </div>
     );
   }
+
+  const isArTitleRtl = hasArabic(currentBlog.title_ar);
+  const isArCatRtl = hasArabic(currentBlog.category_ar);
+  const isArContentRtl = hasArabic(currentBlog.content_ar);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 lg:p-8">
@@ -108,30 +119,31 @@ export default function BlogDetail({ blog, onClose }) {
           )}
 
           {/* English Version */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="mb-8 text-left" dir="ltr">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 text-left">
               English
             </h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-3">
+            <div className="bg-gray-50 rounded-lg p-4 text-left" dir="ltr">
+              <h4 className="font-medium text-gray-900 mb-3 text-left">
                 Title:
               </h4>
-              <p className="text-gray-700 mb-4">
+              <p className="text-gray-700 mb-4 text-left" dir="ltr">
                 {currentBlog.title_en || currentBlog.title || "—"}
               </p>
 
-              <h4 className="font-medium text-gray-900 mb-3">
+              <h4 className="font-medium text-gray-900 mb-3 text-left">
                 Category:
               </h4>
-              <p className="text-gray-700 mb-4">
+              <p className="text-gray-700 mb-4 text-left" dir="ltr">
                 {currentBlog.category_en || currentBlog.category || "—"}
               </p>
 
-              <h4 className="font-medium text-gray-900 mb-3">
+              <h4 className="font-medium text-gray-900 mb-3 text-left">
                 Content:
               </h4>
               <div
-                className="text-gray-700 prose prose-sm max-w-none"
+                className="text-gray-700 prose prose-sm max-w-none text-left"
+                dir="ltr"
                 dangerouslySetInnerHTML={{
                   __html: currentBlog.content_en || currentBlog.content || "—",
                 }}
@@ -144,26 +156,35 @@ export default function BlogDetail({ blog, onClose }) {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               العربية
             </h3>
-            <div className="bg-gray-50 rounded-lg p-4" dir="rtl">
-              <h4 className="font-medium text-gray-900 mb-3">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-medium text-gray-900 mb-3" dir={isArTitleRtl ? "rtl" : "ltr"}>
                 العنوان:
               </h4>
-              <p className="text-gray-700 mb-4">
+              <p
+                className={`text-gray-700 mb-4 ${isArTitleRtl ? "text-right" : "text-left"}`}
+                dir={isArTitleRtl ? "rtl" : "ltr"}
+              >
                 {currentBlog.title_ar || "—"}
               </p>
 
-              <h4 className="font-medium text-gray-900 mb-3">
+              <h4 className="font-medium text-gray-900 mb-3" dir={isArCatRtl ? "rtl" : "ltr"}>
                 القسم:
               </h4>
-              <p className="text-gray-700 mb-4">
+              <p
+                className={`text-gray-700 mb-4 ${isArCatRtl ? "text-right" : "text-left"}`}
+                dir={isArCatRtl ? "rtl" : "ltr"}
+              >
                 {currentBlog.category_ar || "—"}
               </p>
 
-              <h4 className="font-medium text-gray-900 mb-3">
+              <h4 className="font-medium text-gray-900 mb-3" dir={isArContentRtl ? "rtl" : "ltr"}>
                 المحتوى:
               </h4>
               <div
-                className="text-gray-700 prose prose-sm max-w-none font-sans"
+                className={`text-gray-700 prose prose-sm max-w-none font-sans ${
+                  isArContentRtl ? "text-right" : "text-left"
+                }`}
+                dir={isArContentRtl ? "rtl" : "ltr"}
                 dangerouslySetInnerHTML={{
                   __html: currentBlog.content_ar || "—",
                 }}

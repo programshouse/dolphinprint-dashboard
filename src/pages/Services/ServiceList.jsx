@@ -4,6 +4,7 @@ import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import AdminTable from "../../components/ui/AdminTable";
 import { useServicesStore } from "../../stors/useServicesStore";
+import { Eye } from "lucide-react";
 
 export default function ServiceList({ onEdit, onAdd, onShow }) {
   const { services, loading, error, getAllServices, deleteService } =
@@ -28,8 +29,6 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
 
     try {
       await deleteService(serviceId);
-      // If store doesn't remove it automatically:
-      // await getAllServices();
     } catch (e) {
       console.error("Error deleting service:", e);
     }
@@ -42,7 +41,7 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
       render: (s) => {
         const title = s.title_en || s.title_ar || "Untitled";
         return (
-          <div className="max-w-xs truncate" title={title}>
+          <div className="max-w-xs truncate font-medium text-gray-900" title={title}>
             {title}
           </div>
         );
@@ -55,7 +54,7 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
         const description =
           s.description_en || s.description_ar || "No description";
         return (
-          <div className="max-w-xs truncate" title={description}>
+          <div className="max-w-xs truncate text-gray-500 text-sm" title={description}>
             {description}
           </div>
         );
@@ -70,13 +69,17 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
           <img
             src={typeof s.image === "string" ? s.image : URL.createObjectURL(s.image)}
             alt={title}
-            className="w-16 h-16 object-cover rounded-lg"
+            className="w-14 h-14 object-cover rounded-lg border border-gray-200"
           />
         ) : (
-          <span className="text-gray-400 text-sm">No image</span>
+          <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400 border border-gray-200">
+            No image
+          </div>
         );
       },
     },
+
+
   ];
 
   if (loading) {
@@ -87,9 +90,9 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
           description="Manage services that appear on the website"
         />
         <div className="col-span-12">
-          <div className="bg-white  rounded-lg shadow-sm border border-gray-200  p-6 text-center">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
-            <p className="mt-2 text-gray-600 ">
+            <p className="mt-2 text-gray-600">
               Loading services...
             </p>
           </div>
@@ -105,7 +108,6 @@ export default function ServiceList({ onEdit, onAdd, onShow }) {
           title="Services Management"
           description="Manage services that appear on the website"
         />
-
       </PageLayout>
     );
   }

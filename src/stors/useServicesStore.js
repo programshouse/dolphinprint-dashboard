@@ -128,7 +128,13 @@ export const useServicesStore = create((set, get) => ({
         formData.append("title_ar", serviceData?.title_ar ?? "");
         formData.append("description_en", serviceData?.description_en ?? "");
         formData.append("description_ar", serviceData?.description_ar ?? "");
-        formData.append("image", file); // ✅ image
+        if (serviceData?.rate !== undefined && serviceData?.rate !== null && serviceData?.rate !== "") {
+          formData.append("rate", serviceData.rate);
+        }
+        if (serviceData?.views !== undefined && serviceData?.views !== null && serviceData?.views !== "") {
+          formData.append("views", serviceData.views);
+        }
+        formData.append("image", file); // image
 
         response = await fetch(getApiUrl("/services"), {
           method: "POST",
@@ -139,6 +145,19 @@ export const useServicesStore = create((set, get) => ({
           body: formData,
         });
       } else {
+        const jsonBody = {
+          title_en: serviceData?.title_en ?? "",
+          title_ar: serviceData?.title_ar ?? "",
+          description_en: serviceData?.description_en ?? "",
+          description_ar: serviceData?.description_ar ?? "",
+        };
+        if (serviceData?.rate !== undefined && serviceData?.rate !== null && serviceData?.rate !== "") {
+          jsonBody.rate = serviceData.rate;
+        }
+        if (serviceData?.views !== undefined && serviceData?.views !== null && serviceData?.views !== "") {
+          jsonBody.views = serviceData.views;
+        }
+
         response = await fetch(getApiUrl("/services"), {
           method: "POST",
           headers: {
@@ -146,12 +165,7 @@ export const useServicesStore = create((set, get) => ({
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify({
-            title_en: serviceData?.title_en ?? "",
-            title_ar: serviceData?.title_ar ?? "",
-            description_en: serviceData?.description_en ?? "",
-            description_ar: serviceData?.description_ar ?? "",
-          }),
+          body: JSON.stringify(jsonBody),
         });
       }
 
@@ -199,7 +213,13 @@ export const useServicesStore = create((set, get) => ({
         formData.append("title_ar", serviceData?.title_ar ?? "");
         formData.append("description_en", serviceData?.description_en ?? "");
         formData.append("description_ar", serviceData?.description_ar ?? "");
-        formData.append("image", file); // ✅ image (not Image)
+        if (serviceData?.rate !== undefined && serviceData?.rate !== null && serviceData?.rate !== "") {
+          formData.append("rate", serviceData.rate);
+        }
+        if (serviceData?.views !== undefined && serviceData?.views !== null && serviceData?.views !== "") {
+          formData.append("views", serviceData.views);
+        }
+        formData.append("image", file); // image
         formData.append("_method", "PUT");
 
         response = await fetch(getApiUrl(`/services/${id}`), {
@@ -211,6 +231,19 @@ export const useServicesStore = create((set, get) => ({
         });
       } else {
         // text-only update
+        const jsonBody = {
+          title_en: serviceData?.title_en ?? "",
+          title_ar: serviceData?.title_ar ?? "",
+          description_en: serviceData?.description_en ?? "",
+          description_ar: serviceData?.description_ar ?? "",
+        };
+        if (serviceData?.rate !== undefined && serviceData?.rate !== null && serviceData?.rate !== "") {
+          jsonBody.rate = serviceData.rate;
+        }
+        if (serviceData?.views !== undefined && serviceData?.views !== null && serviceData?.views !== "") {
+          jsonBody.views = serviceData.views;
+        }
+
         response = await fetch(getApiUrl(`/services/${id}`), {
           method: "PATCH",
           headers: {
@@ -218,12 +251,7 @@ export const useServicesStore = create((set, get) => ({
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify({
-            title_en: serviceData?.title_en ?? "",
-            title_ar: serviceData?.title_ar ?? "",
-            description_en: serviceData?.description_en ?? "",
-            description_ar: serviceData?.description_ar ?? "",
-          }),
+          body: JSON.stringify(jsonBody),
         });
       }
 

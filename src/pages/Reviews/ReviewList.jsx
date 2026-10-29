@@ -114,6 +114,11 @@ export default function ReviewList({ onAdd, onEdit, onShow }) {
                           <div className="font-semibold text-gray-900 truncate">
                             {r.user_name || "Unnamed"}
                           </div>
+                          {r.user_job && (
+                            <div className="text-xs text-gray-500 truncate">
+                              {r.user_job}
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex gap-1.5 shrink-0">
